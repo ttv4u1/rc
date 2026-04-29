@@ -3,87 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>E-Log Pintar v1.0.3 | Realistic Edition</title>
+    <title>SISTEM E-LOG PINTAR v1.0.3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-        body { font-family: 'Poppins', sans-serif; background-color: #f8fafc; }
-        .anime-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.1;
-            background: url('https://www.malaysia.gov.my/portal/images/jata_negara.png') no-repeat center center;
-            background-size: 40%; filter: grayscale(100%);
-        }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid #e2e8f0;
-            border-radius: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .btn-realistic {
-            transition: all 0.2s;
-            box-shadow: 0 4px 0 #1e293b;
-        }
-        .btn-realistic:active { transform: translateY(2px); box-shadow: 0 2px 0 #1e293b; }
-        .late-highlight { background-color: #fee2e2 !important; color: #dc2626; font-weight: bold; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; }
+        .glass-card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .input-style { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; font-size: 0.875rem; transition: border 0.2s; }
+        .input-style:focus { border-color: #3b82f6; outline: none; ring: 2px ring-blue-500; }
+        .late-highlight { background-color: #fee2e2 !important; color: #b91c1c; font-weight: 600; }
+        .btn-primary { background: #1e293b; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; }
+        .btn-primary:hover { background: #334155; }
+        .btn-save { background: #16a34a; color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+        .btn-save:hover { background: #15803d; }
         input[type="time"]::-webkit-calendar-picker-indicator { cursor: pointer; }
-        .loader { border-top-color: #3b82f6; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="min-h-screen pb-10">
-    <div class="anime-bg"></div>
+<body class="min-h-screen">
 
-    <!-- Header -->
-    <header class="p-4 glass-card m-4 flex flex-wrap justify-between items-center sticky top-2 z-50">
-        <div class="flex items-center space-x-4">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Coat_of_arms_of_Malaysia.svg/1200px-Coat_of_arms_of_Malaysia.svg.png" class="h-12" alt="Jata Malaysia">
+    <!-- HEADER SECTION -->
+    <header class="bg-white border-b sticky top-0 z-50 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Coat_of_arms_of_Malaysia.svg/1200px-Coat_of_arms_of_Malaysia.svg.png" class="h-10" alt="Jata">
             <div>
-                <h1 class="font-bold text-slate-800 text-sm md:text-lg">SISTEM E-LOG PINTAR</h1>
-                <p class="text-[10px] text-blue-600 font-bold">KERAJAAN MALAYSIA | v1.0.3</p>
+                <h1 class="font-extrabold text-sm md:text-lg text-slate-800 leading-tight">SISTEM E-LOG PINTAR</h1>
+                <p class="text-[10px] font-bold text-blue-600">KERAJAAN MALAYSIA | v1.0.3</p>
             </div>
         </div>
-        <div class="hidden lg:block text-center">
-            <div id="realtime-clock" class="text-slate-700 font-mono font-bold text-sm bg-slate-100 px-4 py-1 rounded-full border"></div>
+
+        <div class="hidden lg:block">
+            <div id="realtime-clock" class="text-xs font-mono font-bold bg-slate-100 px-3 py-1.5 rounded-md border text-slate-600"></div>
         </div>
-        <div id="auth-section">
-            <button onclick="loginGoogle()" id="login-btn" class="btn-realistic bg-white px-5 py-2 rounded-lg border flex items-center gap-2 font-bold text-sm">
-                <img src="https://www.google.com/favicon.ico" class="w-4"> Log Masuk Google
+
+        <div id="auth-container">
+            <button id="login-btn" onclick="loginGoogle()" class="flex items-center gap-2 bg-white border px-4 py-2 rounded-lg text-sm font-semibold hover:bg-slate-50 transition">
+                <img src="https://www.google.com/favicon.ico" class="w-4"> Log Masuk
             </button>
             <div id="user-profile" class="hidden items-center gap-3">
-                <div class="text-right hidden sm:block">
+                <div class="text-right hidden sm:block leading-tight">
                     <p id="user-name" class="text-xs font-bold text-slate-800"></p>
-                    <button onclick="logout()" class="text-red-500 text-[10px] font-bold hover:underline italic">Log Keluar</button>
+                    <button onclick="logout()" class="text-[10px] text-red-600 font-bold hover:underline">Log Keluar</button>
                 </div>
-                <img id="user-avatar" class="w-10 h-10 rounded-full border-2 border-blue-500 p-0.5">
+                <img id="user-avatar" class="w-9 h-9 rounded-full border-2 border-blue-500">
             </div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto p-4 space-y-6">
-        
-        <!-- SEKSYEN KAD WAKTU WFB -->
-        <section class="glass-card p-4 md:p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-lg font-bold text-blue-800 border-l-4 border-blue-600 pl-3 uppercase tracking-tight">KAD WAKTU (WFB/BDR)</h2>
-                <input type="month" id="wfb-month" class="text-sm border rounded p-1">
+
+        <!-- KAD WAKTU SECTION -->
+        <section class="glass-card p-5">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h2 class="font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fas fa-clock text-blue-600"></i> KAD WAKTU (WFB/BDR)
+                </h2>
+                <input type="month" id="wfb-month" class="text-xs border p-1 rounded font-bold">
             </div>
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Bahagian A -->
                 <div class="overflow-x-auto">
-                    <h3 class="text-xs font-bold mb-2 text-slate-500 uppercase italic">Bahagian A (1-15hb)</h3>
                     <table class="w-full text-[11px] border-collapse border border-slate-200">
-                        <thead class="bg-slate-800 text-white">
-                            <tr>
-                                <th class="border p-2">TGL</th>
-                                <th class="border p-2">MASUK</th>
-                                <th class="border p-2">KELUAR</th>
-                                <th class="border p-2">MASUK</th>
-                                <th class="border p-2">KELUAR</th>
-                                <th class="border p-2">NOTA</th>
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase">
+                                <th class="border p-2 w-8">Tgl</th>
+                                <th class="border p-2">Masuk</th>
+                                <th class="border p-2">Keluar</th>
+                                <th class="border p-2">Masuk</th>
+                                <th class="border p-2">Keluar</th>
                             </tr>
                         </thead>
                         <tbody id="table-a"></tbody>
@@ -91,16 +80,14 @@
                 </div>
                 <!-- Bahagian B -->
                 <div class="overflow-x-auto">
-                    <h3 class="text-xs font-bold mb-2 text-slate-500 uppercase italic">Bahagian B (16-31hb)</h3>
                     <table class="w-full text-[11px] border-collapse border border-slate-200">
-                        <thead class="bg-slate-800 text-white">
-                            <tr>
-                                <th class="border p-2">TGL</th>
-                                <th class="border p-2">MASUK</th>
-                                <th class="border p-2">KELUAR</th>
-                                <th class="border p-2">MASUK</th>
-                                <th class="border p-2">KELUAR</th>
-                                <th class="border p-2">NOTA</th>
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 uppercase">
+                                <th class="border p-2 w-8">Tgl</th>
+                                <th class="border p-2">Masuk</th>
+                                <th class="border p-2">Keluar</th>
+                                <th class="border p-2">Masuk</th>
+                                <th class="border p-2">Keluar</th>
                             </tr>
                         </thead>
                         <tbody id="table-b"></tbody>
@@ -108,79 +95,99 @@
                 </div>
             </div>
             <div class="mt-4 flex justify-end">
-                <button onclick="alert('Ciri Simpan WFB akan dikemaskini pada v1.0.4')" class="bg-blue-600 text-white px-6 py-2 rounded shadow font-bold text-xs">SIMPAN KAD WAKTU</button>
+                <button onclick="alert('Ciri Simpan Kad Waktu sedang diselenggara.')" class="btn-primary text-xs">Simpan Kad Waktu</button>
             </div>
         </section>
 
-        <!-- SEKSYEN LOG KENDERAAN -->
-        <section class="glass-card p-4 md:p-6 border-t-4 border-green-500">
-            <h2 class="text-lg font-bold text-green-800 mb-4 uppercase">Log Kenderaan Kerajaan</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                <div><label class="text-[10px] font-bold text-slate-500">BULAN LOG</label><input type="month" id="v-bulan" class="w-full p-2 border rounded-lg text-sm"></div>
-                <div><label class="text-[10px] font-bold text-slate-500">NO. PENDAFTARAN</label><input type="text" id="v-plat" placeholder="Contoh: WXC 1234" class="w-full p-2 border rounded-lg text-sm uppercase"></div>
-                <div><label class="text-[10px] font-bold text-slate-500">ODO PERMULAAN</label><input type="number" id="v-start" value="0" class="w-full p-2 border rounded-lg text-sm"></div>
-                <div><label class="text-[10px] font-bold text-slate-500">ODO AKHIR</label><input type="number" id="v-end" value="0" class="w-full p-2 border rounded-lg text-sm"></div>
+        <!-- LOG KENDERAAN SECTION -->
+        <section class="glass-card p-6 border-t-4 border-green-600">
+            <h2 class="font-bold text-green-800 mb-5 flex items-center gap-2">
+                <i class="fas fa-car-side"></i> LOG KENDERAAN KERAJAAN
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Bulan Log</label>
+                    <input type="month" id="v-bulan" class="input-style">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">No. Pendaftaran</label>
+                    <input type="text" id="v-plat" placeholder="456" class="input-style uppercase font-bold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Odo Permulaan</label>
+                    <input type="number" id="v-start" value="5252" class="input-style font-bold">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Odo Akhir</label>
+                    <input type="number" id="v-end" value="445668" class="input-style font-bold">
+                </div>
             </div>
 
-            <div class="flex flex-wrap justify-between items-center gap-4 bg-slate-50 p-4 rounded-xl border-2 border-dashed">
-                <div class="flex items-center gap-4">
-                    <div class="bg-white p-3 rounded shadow-sm border">
-                        <span class="text-[10px] block font-bold text-slate-400">TOTAL JARAK (KM)</span>
-                        <span id="v-calc" class="text-3xl font-black text-green-600">0</span>
-                    </div>
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-slate-50 rounded-xl border-2 border-dashed border-slate-200">
+                <div class="bg-white px-8 py-4 rounded-xl shadow-sm border border-slate-200 text-center md:text-left">
+                    <span class="text-[10px] font-bold text-slate-400 block uppercase mb-1">Total Jarak (KM)</span>
+                    <span id="v-calc" class="text-5xl font-black text-green-600">0</span>
                 </div>
-                <button onclick="simpanLogKenderaan()" class="btn-realistic bg-green-600 text-white px-8 py-3 rounded-xl font-bold uppercase text-xs tracking-widest">
-                    <i class="fas fa-save mr-2"></i> Simpan Rekod Kenderaan
+                <button onclick="simpanLogKenderaan()" class="btn-save w-full md:w-auto shadow-lg shadow-green-200 flex items-center justify-center gap-3">
+                    <i class="fas fa-cloud-upload-alt"></i> Simpan Rekod Kenderaan
                 </button>
             </div>
         </section>
 
         <!-- UPLOAD SECTION -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div onclick="document.getElementById('file-minyak').click()" class="glass-card p-6 text-center cursor-pointer hover:bg-orange-50 border-2 border-transparent hover:border-orange-200 transition">
-                <i class="fas fa-gas-pump text-3xl text-orange-500 mb-2"></i>
+            <div onclick="document.getElementById('file-minyak').click()" class="glass-card p-6 text-center cursor-pointer hover:bg-orange-50 transition border-2 border-transparent hover:border-orange-200 group">
+                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                    <i class="fas fa-gas-pump text-orange-600"></i>
+                </div>
                 <h4 class="font-bold text-sm">Resit Minyak</h4>
                 <p class="text-[10px] text-slate-400">Klik untuk muat naik</p>
                 <input type="file" id="file-minyak" class="hidden" accept="image/*">
             </div>
-            <div onclick="document.getElementById('file-tng').click()" class="glass-card p-6 text-center cursor-pointer hover:bg-blue-50 border-2 border-transparent hover:border-blue-200 transition">
-                <i class="fas fa-credit-card text-3xl text-blue-500 mb-2"></i>
+
+            <div onclick="document.getElementById('file-tng').click()" class="glass-card p-6 text-center cursor-pointer hover:bg-blue-50 transition border-2 border-transparent hover:border-blue-200 group">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                    <i class="fas fa-credit-card text-blue-600"></i>
+                </div>
                 <h4 class="font-bold text-sm">Resit TNG / Tol</h4>
                 <p class="text-[10px] text-slate-400">Klik untuk muat naik</p>
                 <input type="file" id="file-tng" class="hidden" accept="image/*">
             </div>
-            <div onclick="document.getElementById('file-odo').click()" class="glass-card p-6 text-center cursor-pointer hover:bg-purple-50 border-2 border-transparent hover:border-purple-200 transition">
-                <i class="fas fa-tachometer-alt text-3xl text-purple-500 mb-2"></i>
+
+            <div onclick="document.getElementById('file-odo').click()" class="glass-card p-6 text-center cursor-pointer hover:bg-purple-50 transition border-2 border-transparent hover:border-purple-200 group">
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition">
+                    <i class="fas fa-tachometer-alt text-purple-600"></i>
+                </div>
                 <h4 class="font-bold text-sm">Gambar Odometer</h4>
                 <p class="text-[10px] text-slate-400">Klik untuk muat naik</p>
                 <input type="file" id="file-odo" class="hidden" accept="image/*">
             </div>
         </div>
 
-        <!-- GALLERY -->
+        <!-- GALLERY SECTION -->
         <section class="glass-card p-6">
-            <h2 class="text-sm font-bold text-slate-700 mb-4 flex items-center gap-2">
-                <i class="fas fa-images text-purple-500"></i> DOKUMEN MUAT NAIK TERKINI
+            <h2 class="text-xs font-bold text-slate-500 mb-4 flex items-center gap-2 uppercase tracking-widest">
+                <i class="fas fa-folder-open text-amber-500"></i> Dokumen Muat Naik Terkini
             </h2>
-            <div id="gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
-                <!-- Data dari JS -->
+            <div id="gallery" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                <!-- Data Fail muncul di sini -->
             </div>
         </section>
     </main>
 
     <script>
-        // 1. INITIALIZE SUPABASE CLIENT
+        // 1. SUPABASE CONFIGURATION
         const SB_URL = 'https://eefdyxtfcfheslvcfrss.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlZmR5eHRmY2ZoZXNsdmNmcnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njk4MjEsImV4cCI6MjA5MzA0NTgyMX0.I7tl5eiRkn2vNyjbV2GAoI25ZwcvYCP5pjVB4aT5r_I';
         const sb = supabase.createClient(SB_URL, SB_KEY);
 
-        // 2. AUTH LOGIC
+        // 2. AUTHENTICATION LOGIC
         async function loginGoogle() {
             const { error } = await sb.auth.signInWithOAuth({
                 provider: 'google',
                 options: { redirectTo: window.location.origin + window.location.pathname }
             });
-            if (error) alert("Ralat Login: " + error.message);
+            if (error) alert("Ralat: " + error.message);
         }
 
         async function logout() {
@@ -203,10 +210,13 @@
             }
         });
 
-        // 3. UI: JAM & JADUAL
+        // 3. UI: JAM & KAD WAKTU
         function updateClock() {
             const now = new Date();
-            const str = now.toLocaleString('ms-MY', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const str = now.toLocaleString('ms-MY', { 
+                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true 
+            });
             document.getElementById('realtime-clock').innerText = str.toUpperCase();
         }
         setInterval(updateClock, 1000);
@@ -217,20 +227,19 @@
             for (let i = start; i <= end; i++) {
                 html += `
                 <tr class="hover:bg-slate-50 transition">
-                    <td class="border p-1 text-center font-bold bg-slate-100">${i}</td>
-                    <td class="border p-0"><input type="time" onchange="checkTime(this)" class="w-full p-1 border-none bg-transparent"></td>
-                    <td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td>
-                    <td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td>
-                    <td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td>
-                    <td class="border p-0"><input type="text" class="w-full p-1 border-none bg-transparent text-[9px]"></td>
+                    <td class="border p-2 text-center font-bold bg-slate-50">${i}</td>
+                    <td class="border p-0"><input type="time" onchange="checkTime(this)" class="w-full p-2 border-none bg-transparent text-center"></td>
+                    <td class="border p-0"><input type="time" class="w-full p-2 border-none bg-transparent text-center"></td>
+                    <td class="border p-0"><input type="time" class="w-full p-2 border-none bg-transparent text-center"></td>
+                    <td class="border p-0"><input type="time" class="w-full p-2 border-none bg-transparent text-center"></td>
                 </tr>`;
             }
             tbody.innerHTML = html;
         }
 
         function checkTime(el) {
-            if (el.value > "09:00") el.classList.add('late-highlight');
-            else el.classList.remove('late-highlight');
+            if (el.value > "09:00") el.parentElement.classList.add('late-highlight');
+            else el.parentElement.classList.remove('late-highlight');
         }
 
         // 4. LOGIC: PENGIRAAN JARAK
@@ -239,8 +248,10 @@
         const displayJarak = document.getElementById('v-calc');
 
         function recalc() {
-            const diff = (parseInt(inpEnd.value) || 0) - (parseInt(inpStart.value) || 0);
-            displayJarak.innerText = diff > 0 ? diff : 0;
+            const val1 = parseInt(inpStart.value) || 0;
+            const val2 = parseInt(inpEnd.value) || 0;
+            const diff = val2 - val1;
+            displayJarak.innerText = diff > 0 ? diff.toLocaleString() : 0;
         }
         inpStart.oninput = recalc;
         inpEnd.oninput = recalc;
@@ -252,34 +263,47 @@
 
             const bulan = document.getElementById('v-bulan').value;
             const plat = document.getElementById('v-plat').value;
-            if(!bulan || !plat) return alert("Sila isi Bulan dan No. Plat!");
+            const start = parseInt(inpStart.value);
+            const end = parseInt(inpEnd.value);
+            const jarak = parseInt(displayJarak.innerText.replace(/,/g, ''));
+
+            if(!bulan || !plat) return alert("Sila isi Bulan dan No. Pendaftaran!");
+            if(end < start) return alert("Ralat: Odo Akhir tidak boleh kurang dari Odo Awal!");
 
             const { error } = await sb.from('log_kenderaan').insert([{
                 user_id: session.user.id,
                 bulan: bulan,
                 no_plat: plat.toUpperCase(),
-                odo_awal: parseInt(inpStart.value),
-                odo_akhir: parseInt(inpEnd.value),
-                jarak: parseInt(displayJarak.innerText)
+                odo_awal: start,
+                odo_akhir: end,
+                jarak: jarak
             }]);
 
-            if (error) alert("Gagal Simpan: " + error.message);
-            else alert("✅ Data kenderaan telah berjaya disimpan!");
+            if (error) {
+                console.error(error);
+                alert("Gagal Simpan: " + error.message);
+            } else {
+                alert("✅ Rekod kenderaan berjaya disimpan ke dalam database!");
+            }
         }
 
         // 6. STORAGE: MUAT NAIK & GALERI
         async function uploadFile(inputId) {
             const { data: { session } } = await sb.auth.getSession();
-            if (!session) return alert("Sila login!");
+            if (!session) return alert("Sila log masuk!");
 
             const file = document.getElementById(inputId).files[0];
             if (!file) return;
 
-            const path = `${session.user.id}/${Date.now()}-${file.name}`;
-            const { error } = await sb.storage.from('resits').upload(path, file);
+            // Simpan ikut folder user_id untuk keselamatan
+            const fileName = `${Date.now()}-${file.name}`;
+            const path = `${session.user.id}/${fileName}`;
+            
+            const { data, error } = await sb.storage.from('resits').upload(path, file);
 
-            if (error) alert("Upload Gagal: " + error.message);
-            else {
+            if (error) {
+                alert("Upload Gagal: " + error.message);
+            } else {
                 alert("✅ Fail berjaya dimuat naik!");
                 muatTurunGaleri();
             }
@@ -289,22 +313,25 @@
             const { data: { session } } = await sb.auth.getSession();
             if (!session) return;
 
+            // List fail dalam folder user sahaja
             const { data, error } = await sb.storage.from('resits').list(session.user.id + '/');
             const gallery = document.getElementById('gallery');
             
             if (error || !data || data.length === 0) {
-                gallery.innerHTML = '<p class="text-[10px] text-slate-400 italic">Tiada fail dijumpai.</p>';
+                gallery.innerHTML = '<p class="text-[10px] text-slate-400 italic col-span-full">Tiada fail ditemui.</p>';
                 return;
             }
 
             gallery.innerHTML = '';
+            data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Fail terbaru di depan
+
             data.forEach(file => {
                 const { data: urlData } = sb.storage.from('resits').getPublicUrl(`${session.user.id}/${file.name}`);
                 gallery.innerHTML += `
-                    <div class="group relative aspect-square bg-slate-200 rounded-lg overflow-hidden border">
+                    <div class="relative group aspect-square rounded-lg border bg-white overflow-hidden shadow-sm">
                         <img src="${urlData.publicUrl}" class="w-full h-full object-cover">
-                        <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <a href="${urlData.publicUrl}" target="_blank" class="text-white text-[10px] font-bold underline">LIHAT</a>
+                        <div class="absolute inset-0 bg-slate-900/70 opacity-0 group-hover:opacity-100 transition flex items-center justify-center p-2">
+                            <a href="${urlData.publicUrl}" target="_blank" class="text-white text-[10px] font-bold bg-blue-600 px-3 py-1 rounded">LIHAT</a>
                         </div>
                     </div>
                 `;
@@ -320,6 +347,7 @@
             buildTable('table-a', 1, 15);
             buildTable('table-b', 16, 31);
             updateClock();
+            recalc();
         };
     </script>
 </body>
