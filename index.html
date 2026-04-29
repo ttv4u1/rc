@@ -34,7 +34,7 @@
         .btn-realistic:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
         .late-highlight { background-color: #fee2e2 !important; color: #dc2626; font-weight: bold; }
         .ot-highlight { background-color: #dcfce7 !important; color: #166534; }
-        .hide-profile { display: none; }
+        .hide-profile { display: none !important; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -43,7 +43,7 @@
     <header class="p-4 glass-card m-4 flex flex-wrap justify-between items-center">
         <div class="flex items-center space-x-4">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Coat_of_arms_of_Malaysia.svg/1200px-Coat_of_arms_of_Malaysia.svg.png" class="h-16" alt="Jata Malaysia">
-            <h1 class="hidden md:block font-bold text-slate-800">SISTEM E-LOG PINTAR</h1>
+            <h1 class="hidden md:block font-bold text-slate-800 uppercase">Sistem E-Log Pintar</h1>
         </div>
         <div class="text-center">
             <div id="realtime-clock" class="text-blue-600 font-mono font-bold text-lg"></div>
@@ -60,7 +60,7 @@
     </header>
 
     <main class="p-4 space-y-8">
-        <!-- BAHAGIAN WFB -->
+        <!-- SEKSYEN WFB -->
         <section class="glass-card p-6 overflow-x-auto">
             <h2 class="text-2xl font-bold mb-4 border-b-2 border-blue-500 inline-block text-blue-700">KAD WAKTU WFB</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -69,41 +69,40 @@
             </div>
         </section>
 
-        <!-- BAHAGIAN LOG KENDERAAN -->
+        <!-- SEKSYEN LOG KENDERAAN -->
         <section class="glass-card p-6">
             <h2 class="text-2xl font-bold mb-4 border-b-2 border-green-500 inline-block text-green-700">LOG KENDERAAN KERAJAAN</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-green-50 p-4 rounded-xl">
                 <div><label class="text-xs font-bold">Bulan Log</label><input type="month" id="log-bulan" class="w-full p-2 border rounded"></div>
                 <div><label class="text-xs font-bold">No. Pendaftaran</label><input type="text" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold">Odo Permulaan</label><input type="number" id="odo-start" placeholder="0" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold">Odo Akhir</label><input type="number" id="odo-input" placeholder="0" class="w-full p-2 border rounded"></div>
+                <div><label class="text-xs font-bold">Odo Permulaan</label><input type="number" id="odo-start" value="0" class="w-full p-2 border rounded"></div>
+                <div><label class="text-xs font-bold">Odo Akhir</label><input type="number" id="odo-input" value="0" class="w-full p-2 border rounded"></div>
             </div>
 
             <div class="flex justify-between items-center p-4 bg-slate-800 text-white rounded-lg mb-4">
                 <div>
-                    <span class="text-sm">Jarak Perjalanan:</span>
+                    <span class="text-sm uppercase">Jarak Perjalanan:</span>
                     <span id="jarak-calc" class="text-2xl font-bold text-yellow-400 ml-2">0</span> KM
                 </div>
-                <!-- BUTANG SIMPAN DI SINI -->
-                <button onclick="simpanLogKenderaan()" class="btn-realistic bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-bold text-white">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i> SIMPAN REKOD KE AWAN
+                <button onclick="simpanLogKenderaan()" class="btn-realistic bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-bold text-white uppercase tracking-wider">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i> Simpan Rekod
                 </button>
             </div>
         </section>
 
-        <!-- BAHAGIAN UPLOAD -->
+        <!-- SEKSYEN UPLOAD -->
         <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="glass-card p-6 text-center cursor-pointer" onclick="document.getElementById('resit-minyak').click()">
+            <div class="glass-card p-6 text-center cursor-pointer hover:bg-orange-50 transition" onclick="document.getElementById('resit-minyak').click()">
                 <i class="fas fa-gas-pump text-4xl text-orange-500 mb-2"></i>
                 <h3 class="font-bold">Resit Minyak</h3>
                 <input type="file" id="resit-minyak" class="hidden">
             </div>
-            <div class="glass-card p-6 text-center cursor-pointer" onclick="document.getElementById('resit-tng').click()">
+            <div class="glass-card p-6 text-center cursor-pointer hover:bg-blue-50 transition" onclick="document.getElementById('resit-tng').click()">
                 <i class="fas fa-credit-card text-4xl text-blue-500 mb-2"></i>
                 <h3 class="font-bold">Resit TNG</h3>
                 <input type="file" id="resit-tng" class="hidden">
             </div>
-            <div class="glass-card p-6 text-center cursor-pointer" onclick="document.getElementById('resit-odo').click()">
+            <div class="glass-card p-6 text-center cursor-pointer hover:bg-purple-50 transition" onclick="document.getElementById('resit-odo').click()">
                 <i class="fas fa-tachometer-alt text-4xl text-purple-500 mb-2"></i>
                 <h3 class="font-bold">Gambar Odometer</h3>
                 <input type="file" id="resit-odo" class="hidden">
@@ -119,14 +118,29 @@
 
         // 2. AUTH LOGIC
         async function loginGoogle() {
-            await supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
+            try {
+                // redirectTo akan automatik pilih localhost jika anda test di komputer, atau github jika di internet
+                const targetURL = window.location.origin + window.location.pathname;
+                const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: targetURL }
+                });
+                if (error) throw error;
+            } catch (err) {
+                alert("Ralat Login: " + err.message);
+            }
         }
-        async function logout() { await supabase.auth.signOut(); window.location.reload(); }
+
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
 
         supabase.auth.onAuthStateChange((event, session) => {
             const loginBtn = document.getElementById('login-btn');
             const userProfile = document.getElementById('user-profile');
             const userAvatar = document.getElementById('user-avatar');
+
             if (session) {
                 loginBtn.classList.add('hidden');
                 userProfile.classList.remove('hide-profile');
@@ -135,10 +149,11 @@
             } else {
                 loginBtn.classList.remove('hidden');
                 userProfile.classList.add('hide-profile');
+                userProfile.classList.remove('flex');
             }
         });
 
-        // 3. UI LOGIC (CLOCK & TABLE)
+        // 3. UI LOGIC
         function updateClock() {
             const now = new Date();
             document.getElementById('realtime-clock').innerText = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).toUpperCase();
@@ -147,75 +162,73 @@
 
         function generateTable(id, start, end) {
             const tbody = document.getElementById(id);
+            if(!tbody) return;
             for (let i = start; i <= end; i++) {
                 tbody.innerHTML += `<tr><td class="border p-1 text-center font-bold">${i}</td><td class="border p-0"><input type="time" onchange="checkTime(this)" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="text" class="w-full p-1 border-none bg-transparent"></td></tr>`;
             }
         }
-        generateTable('table-a', 1, 15);
-        generateTable('table-b', 16, 31);
 
-        // 4. CALCULATION LOGIC
-        const odoStart = document.getElementById('odo-start');
-        const odoInput = document.getElementById('odo-input');
-        const jarakCalc = document.getElementById('jarak-calc');
+        function checkTime(el) {
+            if (el.value > "09:00") el.classList.add('late-highlight');
+            else el.classList.remove('late-highlight');
+        }
+
+        // 4. CALCULATION
+        const oStart = document.getElementById('odo-start');
+        const oEnd = document.getElementById('odo-input');
+        const jCalc = document.getElementById('jarak-calc');
 
         function updateJarak() {
-            const start = parseInt(odoStart.value) || 0;
-            const end = parseInt(odoInput.value) || 0;
-            const dist = end - start;
-            jarakCalc.innerText = dist > 0 ? dist : 0;
+            const val = (parseInt(oEnd.value) || 0) - (parseInt(oStart.value) || 0);
+            jCalc.innerText = val > 0 ? val : 0;
         }
-        odoStart.oninput = updateJarak;
-        odoInput.oninput = updateJarak;
+        oStart.oninput = updateJarak;
+        oEnd.oninput = updateJarak;
 
-        // 5. SAVE DATA TO SUPABASE (PENTING!)
+        // 5. DATABASE SAVE
         async function simpanLogKenderaan() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return alert("Sila login dengan Google dahulu!");
-
-            const bulan = document.getElementById('log-bulan').value;
-            const awal = parseInt(odoStart.value) || 0;
-            const akhir = parseInt(odoInput.value) || 0;
-            const jarak = parseInt(jarakCalc.innerText) || 0;
-
-            if(!bulan) return alert("Sila pilih Bulan Log!");
-
-            // Hantar ke Table 'log_kenderaan'
-            const { error } = await supabase.from('log_kenderaan').insert([{
-                user_id: session.user.id,
-                bulan: bulan,
-                odo_awal: awal,
-                odo_akhir: akhir,
-                jarak: jarak
-            }]);
-
-            if (error) {
-                alert("Gagal simpan: " + error.message);
-            } else {
-                alert("✅ Rekod berjaya disimpan ke pangkalan data!");
-            }
-        }
-
-        // 6. STORAGE LOGIC
-        async function uploadFile(fileInputId, bucketName) {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return alert("Sila login dahulu!");
 
-            const fileInput = document.getElementById(fileInputId);
-            const file = fileInput.files[0];
+            const bulan = document.getElementById('log-bulan').value;
+            if(!bulan) return alert("Sila pilih bulan!");
+
+            const { error } = await supabase.from('log_kenderaan').insert([{
+                user_id: session.user.id,
+                bulan: bulan,
+                odo_awal: parseInt(oStart.value),
+                odo_akhir: parseInt(oEnd.value),
+                jarak: parseInt(jCalc.innerText)
+            }]);
+
+            if (error) alert("Gagal: " + error.message);
+            else alert("✅ Rekod berjaya disimpan!");
+        }
+
+        // 6. FILE UPLOAD
+        async function uploadFile(inputId, bucket) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return alert("Sila login dahulu!");
+
+            const file = document.getElementById(inputId).files[0];
             if (!file) return;
 
-            const filePath = `${session.user.id}/${Date.now()}-${file.name}`;
-            const { data, error } = await supabase.storage.from(bucketName).upload(filePath, file);
+            const path = `${session.user.id}/${Date.now()}-${file.name}`;
+            const { error } = await supabase.storage.from(bucket).upload(path, file);
 
-            if (error) alert("Upload Gagal: " + error.message);
-            else alert("✅ Gambar berjaya dihantar!");
+            if (error) alert("Gagal Upload: " + error.message);
+            else alert("✅ Fail berjaya dihantar!");
         }
 
         document.getElementById('resit-minyak').onchange = () => uploadFile('resit-minyak', 'resits');
         document.getElementById('resit-tng').onchange = () => uploadFile('resit-tng', 'resits');
         document.getElementById('resit-odo').onchange = () => uploadFile('resit-odo', 'resits');
 
+        window.onload = () => {
+            generateTable('table-a', 1, 15);
+            generateTable('table-b', 16, 31);
+            updateClock();
+        };
     </script>
 </body>
 </html>
