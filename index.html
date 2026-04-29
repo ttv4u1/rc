@@ -3,273 +3,1432 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem E-Log WFB & Kenderaan Kerajaan | v1.0.2 Realistic</title>
+    <title>Sistem Pengesanan Masa & Log Kenderaan Kerajaan Malaysia v2.1.0</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+    
+    <!-- Google Auth -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(rgba(255,255,255,0.8), rgba(255,255,255,0.8)), 
-                        url('https://www.malaysia.gov.my/portal/images/jata_negara.png') no-repeat center center fixed;
-            background-size: contain;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
         }
+        
         .anime-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15;
-            background: url('https://images.alphacoders.com/132/1327116.png') center/cover;
-            filter: grayscale(30%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff20" d="M0,96L48,112C96,128,192,160,288,165.3C384,171,480,149,576,128C672,107,768,85,864,96C960,107,1056,149,1152,154.7C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            z-index: -1;
+            opacity: 0.3;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.9);
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
         }
-        .btn-realistic {
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 4px 0 rgb(15, 23, 42);
+        
+        .realistic-button {
+            background: linear-gradient(145deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px 0 rgba(99, 102, 241, 0.4);
+            position: relative;
+            overflow: hidden;
         }
-        .btn-realistic:active { transform: translateY(4px); box-shadow: 0 0 0 transparent; }
-        .late-highlight { background-color: #fee2e2 !important; color: #dc2626; font-weight: bold; }
-        .ot-highlight { background-color: #dcfce7 !important; color: #166534; }
-        .hide-profile { display: none !important; }
+        
+        .realistic-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.6);
+        }
+        
+        .realistic-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 10px 0 rgba(99, 102, 241, 0.4);
+        }
+        
+        .realistic-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .realistic-button:hover::before {
+            left: 100%;
+        }
+        
+        .time-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .time-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+        
+        .late-time {
+            color: #dc2626 !important;
+            font-weight: 600;
+            background-color: rgba(220, 38, 38, 0.1);
+        }
+        
+        .ot-time {
+            color: #f59e0b !important;
+            font-weight: 600;
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+        
+        .table-header {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+        
+        .logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: contain;
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        
+        .tab-button {
+            padding: 10px 20px;
+            border: none;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .tab-button.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+        
+        .profile-section {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .autohide {
+            animation: fadeOut 3s forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; pointer-events: none; }
+        }
+        
+        .real-time-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #4f46e5;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .logo-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .logo {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .profile-section {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-bottom: 1rem;
+            }
+        }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body>
     <div class="anime-bg"></div>
-
-    <header class="p-4 glass-card m-4 flex flex-wrap justify-between items-center">
-        <div class="flex items-center space-x-4">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Coat_of_arms_of_Malaysia.svg/1200px-Coat_of_arms_of_Malaysia.svg.png" class="h-16" alt="Jata Malaysia">
-            <h1 class="hidden md:block font-bold text-slate-800 uppercase text-sm">Sistem E-Log Pintar</h1>
-        </div>
-        <div class="text-center">
-            <div id="realtime-clock" class="text-blue-600 font-mono font-bold text-lg"></div>
-        </div>
-        <div id="auth-section" class="flex items-center space-x-3">
-            <button onclick="loginGoogle()" id="login-btn" class="btn-realistic bg-white px-6 py-2 rounded-full border flex items-center gap-2 font-bold">
-                <img src="https://www.google.com/favicon.ico" class="w-4"> Login Google
-            </button>
-            <div id="user-profile" class="hide-profile items-center gap-2">
-                <img id="user-avatar" class="w-10 h-10 rounded-full border-2 border-blue-500">
-                <button onclick="logout()" class="text-red-500 text-sm font-bold underline">Keluar</button>
-            </div>
-        </div>
-    </header>
-
-    <main class="p-4 space-y-8">
-        <!-- SEKSYEN WFB -->
-        <section class="glass-card p-6 overflow-x-auto">
-            <h2 class="text-xl font-bold mb-4 border-b-2 border-blue-500 inline-block text-blue-700">KAD WAKTU WFB</h2>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div><h3 class="font-bold mb-2">BAHAGIAN A (1-15hb)</h3><table class="w-full text-[10px] border"><thead class="bg-slate-800 text-white"><tr><th class="border p-1">TGL</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">NOTA</th></tr></thead><tbody id="table-a"></tbody></table></div>
-                <div><h3 class="font-bold mb-2">BAHAGIAN B (16-31hb)</h3><table class="w-full text-[10px] border"><thead class="bg-slate-800 text-white"><tr><th class="border p-1">TGL</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">NOTA</th></tr></thead><tbody id="table-b"></tbody></table></div>
-            </div>
-        </section>
-
-        <!-- SEKSYEN LOG KENDERAAN -->
-        <section class="glass-card p-6">
-            <h2 class="text-xl font-bold mb-4 border-b-2 border-green-500 inline-block text-green-700">LOG KENDERAAN KERAJAAN</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-green-50 p-4 rounded-xl">
-                <div><label class="text-xs font-bold">Bulan Log</label><input type="month" id="log-bulan" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold">No. Pendaftaran</label><input type="text" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold">Odo Permulaan</label><input type="number" id="odo-start" value="0" class="w-full p-2 border rounded"></div>
-                <div><label class="text-xs font-bold">Odo Akhir</label><input type="number" id="odo-input" value="0" class="w-full p-2 border rounded"></div>
-            </div>
-
-            <div class="flex justify-between items-center p-4 bg-slate-800 text-white rounded-lg mb-4">
+    
+    <!-- Profile Section -->
+    <div class="profile-section" id="profileSection" style="display: none;">
+        <div class="profile-card autohide">
+            <div class="flex items-center space-x-3">
+                <img id="userAvatar" src="" alt="User" class="w-12 h-12 rounded-full">
                 <div>
-                    <span class="text-xs uppercase">Jarak Perjalanan:</span>
-                    <span id="jarak-calc" class="text-2xl font-bold text-yellow-400 ml-2">0</span> KM
+                    <div id="userName" class="font-semibold"></div>
+                    <div id="userEmail" class="text-sm text-gray-600"></div>
                 </div>
-                <button onclick="simpanLogKenderaan()" class="btn-realistic bg-green-500 hover:bg-green-600 px-6 py-2 rounded-xl font-bold text-white uppercase text-xs tracking-wider">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i> Simpan Rekod
+                <button onclick="logout()" class="ml-auto text-red-500 hover:text-red-700">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
-        </section>
-
-        <!-- SEKSYEN UPLOAD -->
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="glass-card p-6 text-center cursor-pointer hover:bg-orange-50 transition" onclick="document.getElementById('resit-minyak').click()">
-                <i class="fas fa-gas-pump text-4xl text-orange-500 mb-2"></i>
-                <h3 class="font-bold">Resit Minyak</h3>
-                <input type="file" id="resit-minyak" class="hidden">
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        
+        <!-- Header with Logos -->
+        <div class="logo-container glass-effect">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Coat_of_arms_of_Malaysia.svg/120px-Coat_of_arms_of_Malaysia.svg.png" alt="Jata Malaysia" class="logo">
+            <div class="text-center">
+                <h1 class="text-2xl md:text-3xl font-bold text-white mb-2">Sistem Pengesanan Masa & Log Kenderaan</h1>
+                <p class="text-white/80">Kerajaan Malaysia - Versi 2.1.0</p>
             </div>
-            <div class="glass-card p-6 text-center cursor-pointer hover:bg-blue-50 transition" onclick="document.getElementById('resit-tng').click()">
-                <i class="fas fa-credit-card text-4xl text-blue-500 mb-2"></i>
-                <h3 class="font-bold">Resit TNG</h3>
-                <input type="file" id="resit-tng" class="hidden">
+            <div class="flex space-x-4">
+                <img src="https://via.placeholder.com/60x60/4f46e5/ffffff?text=LOGO" alt="Logo Jabatan" class="logo">
+                <img src="https://via.placeholder.com/60x60/7c3aed/ffffff?text=P" alt="Logo Penguatkuasaan" class="logo">
             </div>
-            <div class="glass-card p-6 text-center cursor-pointer hover:bg-purple-50 transition" onclick="document.getElementById('resit-odo').click()">
-                <i class="fas fa-tachometer-alt text-4xl text-purple-500 mb-2"></i>
-                <h3 class="font-bold">Gambar Odometer</h3>
-                <input type="file" id="resit-odo" class="hidden">
+        </div>
+        
+        <!-- Real Time Display -->
+        <div class="text-center mb-6">
+            <div class="real-time-display" id="realTimeDisplay"></div>
+        </div>
+        
+        <!-- Login Section -->
+        <div id="loginSection" class="glass-effect rounded-2xl p-8 mb-8">
+            <h2 class="text-2xl font-bold text-center mb-6">Log Masuk Sistem</h2>
+            <div class="max-w-md mx-auto">
+                <div id="googleSignInButton"></div>
             </div>
-        </section>
-
-        <!-- SEKSYEN GALERI (TAMBAHAN PENTING) -->
-        <section class="glass-card p-6">
-            <h2 class="text-xl font-bold mb-4 border-b-2 border-purple-500 inline-block text-purple-700">GALERI DOKUMEN</h2>
-            <div id="gallery" class="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <p class="text-slate-400 text-sm italic col-span-full">Tiada dokumen dimuat naik lagi.</p>
+        </div>
+        
+        <!-- Main Application (Hidden until login) -->
+        <div id="mainApp" style="display: none;">
+            
+            <!-- Tab Navigation -->
+            <div class="flex flex-wrap justify-center mb-6">
+                <button class="tab-button active" onclick="switchTab('timeCard')">
+                    <i class="fas fa-clock mr-2"></i>Kad Mencatat Masa
+                </button>
+                <button class="tab-button" onclick="switchTab('vehicleLog')">
+                    <i class="fas fa-car mr-2"></i>Log Kenderaan
+                </button>
+                <button class="tab-button" onclick="switchTab('receipts')">
+                    <i class="fas fa-receipt mr-2"></i>Resit & Dokumen
+                </button>
             </div>
-        </section>
-    </main>
-
-    <script>
-        // 1. CONFIG
-        const SUPABASE_URL = 'https://eefdyxtfcfheslvcfrss.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlZmR5eHRmY2ZoZXNsdmNmcnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njk4MjEsImV4cCI6MjA5MzA0NTgyMX0.I7tl5eiRkn2vNyjbV2GAoI25ZwcvYCP5pjVB4aT5r_I';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // 2. AUTH LOGIC
-        async function loginGoogle() {
-            try {
-                const targetURL = window.location.origin + window.location.pathname;
-                const { error } = await supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: targetURL }
-                });
-                if (error) throw error;
-            } catch (err) {
-                alert("Ralat Login: " + err.message);
-            }
-        }
-
-        async function logout() {
-            await supabase.auth.signOut();
-            window.location.reload();
-        }
-
-        supabase.auth.onAuthStateChange((event, session) => {
-            const loginBtn = document.getElementById('login-btn');
-            const userProfile = document.getElementById('user-profile');
-            const userAvatar = document.getElementById('user-avatar');
-
-            if (session) {
-                loginBtn.classList.add('hidden');
-                userProfile.classList.remove('hide-profile');
-                userProfile.classList.add('flex');
-                userAvatar.src = session.user.user_metadata.avatar_url;
-                muatTurunGaleri(); // Panggil Galeri
-            } else {
-                loginBtn.classList.remove('hidden');
-                userProfile.classList.add('hide-profile');
-                userProfile.classList.remove('flex');
-            }
-        });
-
-        // 3. UI LOGIC (Jam & Jadual)
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('realtime-clock').innerText = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).toUpperCase();
-        }
-        setInterval(updateClock, 1000);
-
-        function generateTable(id, start, end) {
-            const tbody = document.getElementById(id);
-            if(!tbody) return;
-            for (let i = start; i <= end; i++) {
-                tbody.innerHTML += `<tr><td class="border p-1 text-center font-bold">${i}</td><td class="border p-0"><input type="time" onchange="checkTime(this)" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="text" class="w-full p-1 border-none bg-transparent text-[8px]"></td></tr>`;
-            }
-        }
-
-        function checkTime(el) {
-            if (el.value > "09:00") el.classList.add('late-highlight');
-            else el.classList.remove('late-highlight');
-        }
-
-        // 4. CALCULATION
-        const oStart = document.getElementById('odo-start');
-        const oEnd = document.getElementById('odo-input');
-        const jCalc = document.getElementById('jarak-calc');
-
-        function updateJarak() {
-            const val = (parseInt(oEnd.value) || 0) - (parseInt(oStart.value) || 0);
-            jCalc.innerText = val > 0 ? val : 0;
-        }
-        oStart.oninput = updateJarak;
-        oEnd.oninput = updateJarak;
-
-        // 5. DATABASE SAVE
-        async function simpanLogKenderaan() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return alert("Sila login dahulu!");
-
-            const bulan = document.getElementById('log-bulan').value;
-            if(!bulan) return alert("Sila pilih bulan!");
-
-            const { error } = await supabase.from('log_kenderaan').insert([{
-                user_id: session.user.id,
-                bulan: bulan,
-                odo_awal: parseInt(oStart.value),
-                odo_akhir: parseInt(oEnd.value),
-                jarak: parseInt(jCalc.innerText)
-            }]);
-
-            if (error) alert("Gagal: " + error.message);
-            else alert("✅ Rekod berjaya disimpan!");
-        }
-
-        // 6. STORAGE & GALLERY LOGIC
-        async function uploadFile(inputId, bucket) {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return alert("Sila login dahulu!");
-
-            const file = document.getElementById(inputId).files[0];
-            if (!file) return;
-
-            const path = `${session.user.id}/${Date.now()}-${file.name}`;
-            const { error } = await supabase.storage.from(bucket).upload(path, file);
-
-            if (error) {
-                alert("Gagal Upload: " + error.message);
-            } else {
-                alert("✅ Fail berjaya dihantar!");
-                muatTurunGaleri(); // Refresh galeri
-            }
-        }
-
-        async function muatTurunGaleri() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
-
-            const { data, error } = await supabase.storage
-                .from('resits')
-                .list(session.user.id + '/');
-
-            if (error || !data) return;
-
-            const galleryDiv = document.getElementById('gallery');
-            galleryDiv.innerHTML = ''; 
-
-            data.forEach(file => {
-                const { data: urlData } = supabase.storage
-                    .from('resits')
-                    .getPublicUrl(`${session.user.id}/${file.name}`);
-
-                galleryDiv.innerHTML += `
-                    <div class="relative group rounded border overflow-hidden bg-white shadow-sm">
-                        <img src="${urlData.publicUrl}" class="h-24 w-full object-cover">
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                            <a href="${urlData.publicUrl}" target="_blank" class="text-[10px] text-white underline font-bold">PAPAR</a>
+            
+            <!-- Time Card Section -->
+            <div id="timeCardSection" class="tab-content">
+                <div class="glass-effect rounded-2xl p-6 mb-8">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Kad Mencatat Waktu</h2>
+                    
+                    <!-- Time Card Form -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <!-- Side A (Days 1-15) -->
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h3 class="text-xl font-bold mb-4 text-center">Muka A - Hari 1-15</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">No. A</label>
+                                        <input type="text" id="ano" class="time-input w-full" placeholder="1-15">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Nama</label>
+                                        <input type="text" id="aname" class="time-input w-full" placeholder="Nama Penuh">
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Kem./Jab.</label>
+                                        <input type="text" id="adept" class="time-input w-full" placeholder="Jabatan">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Bahagian/Seksyen</label>
+                                        <input type="text" id="abahagian" class="time-input w-full" placeholder="Bahagian">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Bulan</label>
+                                        <select id="abulan" class="time-input w-full">
+                                            <option value="">Pilih Bulan</option>
+                                            <option value="Januari">Januari</option>
+                                            <option value="Februari">Februari</option>
+                                            <option value="Mac">Mac</option>
+                                            <option value="April">April</option>
+                                            <option value="Mei">Mei</option>
+                                            <option value="Jun">Jun</option>
+                                            <option value="Julai">Julai</option>
+                                            <option value="Ogos">Ogos</option>
+                                            <option value="September">September</option>
+                                            <option value="Oktober">Oktober</option>
+                                            <option value="November">November</option>
+                                            <option value="Disember">Disember</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Time Table A -->
+                            <div class="mt-6 overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="table-header">
+                                            <th class="p-2 border">TARIKH</th>
+                                            <th class="p-2 border">MASUK</th>
+                                            <th class="p-2 border">KELUAR</th>
+                                            <th class="p-2 border">MASUK</th>
+                                            <th class="p-2 border">KELUAR</th>
+                                            <th class="p-2 border">KENYATAAN</th>
+                                            <th class="p-2 border">T/T</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="timeTableA">
+                                        <!-- Generated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Side B (Days 15-31) -->
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h3 class="text-xl font-bold mb-4 text-center">Muka B - Hari 15-31</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">No. B</label>
+                                        <input type="text" id="bno" class="time-input w-full" placeholder="Sama seperti No. A">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Nama</label>
+                                        <input type="text" id="bname" class="time-input w-full" placeholder="Nama Penuh">
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Kem./Jab.</label>
+                                        <input type="text" id="bdept" class="time-input w-full" placeholder="Jabatan">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Bahagian/Seksyen</label>
+                                        <input type="text" id="bbahagian" class="time-input w-full" placeholder="Bahagian">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium mb-2">Bulan</label>
+                                        <select id="bbulan" class="time-input w-full">
+                                            <option value="">Pilih Bulan</option>
+                                            <option value="Januari">Januari</option>
+                                            <option value="Februari">Februari</option>
+                                            <option value="Mac">Mac</option>
+                                            <option value="April">April</option>
+                                            <option value="Mei">Mei</option>
+                                            <option value="Jun">Jun</option>
+                                            <option value="Julai">Julai</option>
+                                            <option value="Ogos">Ogos</option>
+                                            <option value="September">September</option>
+                                            <option value="Oktober">Oktober</option>
+                                            <option value="November">November</option>
+                                            <option value="Disember">Disember</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Time Table B -->
+                            <div class="mt-6 overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="table-header">
+                                            <th class="p-2 border">TARIKH</th>
+                                            <th class="p-2 border">MASUK</th>
+                                            <th class="p-2 border">KELUAR</th>
+                                            <th class="p-2 border">MASUK</th>
+                                            <th class="p-2 border">KELUAR</th>
+                                            <th class="p-2 border">KENYATAAN</th>
+                                            <th class="p-2 border">T/T</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="timeTableB">
+                                        <!-- Generated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
+                    
+                    <div class="text-center">
+                        <button class="realistic-button" onclick="saveTimeCard()">
+                            <i class="fas fa-save mr-2"></i>Simpan Kad Masa
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Vehicle Log Section -->
+            <div id="vehicleLogSection" class="tab-content" style="display: none;">
+                <div class="glass-effect rounded-2xl p-6 mb-8">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Log Perjalanan Kenderaan</h2>
+                    
+                    <!-- Vehicle Information -->
+                    <div class="bg-white rounded-xl p-6 mb-6 shadow-lg">
+                        <h3 class="text-xl font-bold mb-4">Maklumat Kenderaan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Bulan Rekod</label>
+                                <select id="recordMonth" class="time-input w-full">
+                                    <option value="">Pilih Bulan</option>
+                                    <option value="Januari">Januari</option>
+                                    <option value="Februari">Februari</option>
+                                    <option value="Mac">Mac</option>
+                                    <option value="April">April</option>
+                                    <option value="Mei">Mei</option>
+                                    <option value="Jun">Jun</option>
+                                    <option value="Julai">Julai</option>
+                                    <option value="Ogos">Ogos</option>
+                                    <option value="September">September</option>
+                                    <option value="Oktober">Oktober</option>
+                                    <option value="November">November</option>
+                                    <option value="Disember">Disember</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">No. Pendaftaran Kereta</label>
+                                <input type="text" id="carRegNo" class="time-input w-full" placeholder="ABC 1234">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Odo Permulaan (km)</label>
+                                <input type="number" id="startOdo" class="time-input w-full" placeholder="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium mb-2">Bahagian/Unit</label>
+                                <input type="text" id="department" class="time-input w-full" placeholder="Bahagian">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Journey Log Table -->
+                    <div class="bg-white rounded-xl p-6 shadow-lg">
+                        <h3 class="text-xl font-bold mb-4">Rekod Perjalanan</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="table-header">
+                                        <th class="p-2 border">TARIKH</th>
+                                        <th class="p-2 border">MASA PERGI</th>
+                                        <th class="p-2 border">MASA BALIK</th>
+                                        <th class="p-2 border">PEMANDU</th>
+                                        <th class="p-2 border">TUJUAN & LOKASI</th>
+                                        <th class="p-2 border">PELULUS</th>
+                                        <th class="p-2 border">PENGGUNA</th>
+                                        <th class="p-2 border">ODO AKHIR</th>
+                                        <th class="p-2 border">JARAK (km)</th>
+                                        <th class="p-2 border">KOS & RESIT</th>
+                                        <th class="p-2 border">LITER</th>
+                                        <th class="p-2 border">NOTA</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="vehicleLogTable">
+                                    <!-- Generated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Total Cost Display -->
+                        <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-lg">Jumlah Keseluruhan Kos Bahan Api:</span>
+                                <span class="text-2xl font-bold text-blue-600">RM <span id="totalFuelCost">0.00</span></span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-6">
+                            <button class="realistic-button" onclick="saveVehicleLog()">
+                                <i class="fas fa-save mr-2"></i>Simpan Log Kenderaan
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Receipts Section -->
+            <div id="receiptsSection" class="tab-content" style="display: none;">
+                <div class="glass-effect rounded-2xl p-6 mb-8">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Resit & Dokumen</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Fuel Receipts -->
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">Resit Minyak</h3>
+                            <div class="upload-area" onclick="document.getElementById('fuelReceiptInput').click()" ondrop="handleDrop(event, 'fuel')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-blue-500 mb-4"></i>
+                                <p class="text-gray-600 mb-2">Klik atau seret resit minyak di sini</p>
+                                <p class="text-sm text-gray-500">Format: JPG, PNG, PDF (Max 5MB)</p>
+                                <input type="file" id="fuelReceiptInput" accept="image/*,.pdf" multiple style="display: none;" onchange="handleFileSelect(event, 'fuel')">
+                            </div>
+                            <div id="fuelReceiptsList" class="mt-4 space-y-2">
+                                <!-- Uploaded receipts will appear here -->
+                            </div>
+                        </div>
+                        
+                        <!-- TNG Receipts -->
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">Resit TNG</h3>
+                            <div class="upload-area" onclick="document.getElementById('tngReceiptInput').click()" ondrop="handleDrop(event, 'tng')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <i class="fas fa-cloud-upload-alt text-4xl text-purple-500 mb-4"></i>
+                                <p class="text-gray-600 mb-2">Klik atau seret resit TNG di sini</p>
+                                <p class="text-sm text-gray-500">Format: JPG, PNG, PDF (Max 5MB)</p>
+                                <input type="file" id="tngReceiptInput" accept="image/*,.pdf" multiple style="display: none;" onchange="handleFileSelect(event, 'tng')">
+                            </div>
+                            <div id="tngReceiptsList" class="mt-4 space-y-2">
+                                <!-- Uploaded receipts will appear here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Odometer Photos -->
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">Gambar Odometer</h3>
+                            <div class="upload-area" onclick="document.getElementById('odometerInput').click()" ondrop="handleDrop(event, 'odometer')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <i class="fas fa-camera text-4xl text-green-500 mb-4"></i>
+                                <p class="text-gray-600 mb-2">Klik atau seret gambar odometer di sini</p>
+                                <p class="text-sm text-gray-500">Format: JPG, PNG (Max 5MB)</p>
+                                <input type="file" id="odometerInput" accept="image/*" multiple style="display: none;" onchange="handleFileSelect(event, 'odometer')">
+                            </div>
+                            <div id="odometerPhotosList" class="mt-4 space-y-2">
+                                <!-- Uploaded photos will appear here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Other Documents -->
+                        <div class="bg-white rounded-xl p-6 shadow-lg">
+                            <h3 class="text-xl font-bold mb-4">Dokumen Lain</h3>
+                            <div class="upload-area" onclick="document.getElementById('otherDocsInput').click()" ondrop="handleDrop(event, 'other')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                                <i class="fas fa-file-alt text-4xl text-orange-500 mb-4"></i>
+                                <p class="text-gray-600 mb-2">Klik atau seret dokumen lain di sini</p>
+                                <p class="text-sm text-gray-500">Format: JPG, PNG, PDF (Max 5MB)</p>
+                                <input type="file" id="otherDocsInput" accept="image/*,.pdf" multiple style="display: none;" onchange="handleFileSelect(event, 'other')">
+                            </div>
+                            <div id="otherDocsList" class="mt-4 space-y-2">
+                                <!-- Uploaded documents will appear here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const SUPABASE_URL = 'https://eefdyxtfcfheslvcfrss.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVlZmR5eHRmY2ZoZXNsdmNmcnNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0Njk4MjEsImV4cCI6MjA5MzA0NTgyMX0.I7tl5eiRkn2vNyjbV2GAoI25ZwcvYCP5pjVB4aT5r_I';
+        const GOOGLE_CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // Replace with actual Google Client ID
+        
+        // Initialize Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Global variables
+        let currentUser = null;
+        let uploadedFiles = {
+            fuel: [],
+            tng: [],
+            odometer: [],
+            other: []
+        };
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGoogleAuth();
+            updateRealTime();
+            setInterval(updateRealTime, 1000);
+            generateTimeTables();
+            generateVehicleLogTable();
+            checkAuthStatus();
+        });
+        
+        // Real time clock
+        function updateRealTime() {
+            const now = new Date();
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+                hour12: true 
+            };
+            const timeString = now.toLocaleString('ms-MY', options);
+            document.getElementById('realTimeDisplay').textContent = timeString;
+        }
+        
+        // Google Authentication
+        function initializeGoogleAuth() {
+            google.accounts.id.initialize({
+                client_id: GOOGLE_CLIENT_ID,
+                callback: handleGoogleSignIn
+            });
+            
+            google.accounts.id.renderButton(
+                document.getElementById('googleSignInButton'),
+                { theme: 'outline', size: 'large', text: 'signin_with', width: '300' }
+            );
+        }
+        
+        async function handleGoogleSignIn(response) {
+            try {
+                const { data, error } = await supabase.auth.signInWithIdToken({
+                    provider: 'google',
+                    token: response.credential
+                });
+                
+                if (error) throw error;
+                
+                currentUser = data.user;
+                showMainApp();
+                showProfile();
+            } catch (error) {
+                console.error('Error signing in:', error);
+                alert('Ralat semasa log masuk: ' + error.message);
+            }
+        }
+        
+        async function checkAuthStatus() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (session) {
+                    currentUser = session.user;
+                    showMainApp();
+                    showProfile();
+                } else {
+                    showLoginSection();
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                showLoginSection();
+            }
+        }
+        
+        function showLoginSection() {
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('profileSection').style.display = 'none';
+        }
+        
+        function showMainApp() {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('profileSection').style.display = 'block';
+        }
+        
+        function showProfile() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.user_metadata?.full_name || currentUser.email;
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userAvatar').src = currentUser.user_metadata?.avatar_url || `https://ui-avatars.com/api/?name=${currentUser.email}&background=6366f1&color=fff`;
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    const profileCard = document.querySelector('.profile-card');
+                    if (profileCard) {
+                        profileCard.classList.add('autohide');
+                    }
+                }, 1000);
+            }
+        }
+        
+        async function logout() {
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                currentUser = null;
+                showLoginSection();
+            } catch (error) {
+                console.error('Error signing out:', error);
+                alert('Ralat semasa log keluar: ' + error.message);
+            }
+        }
+        
+        // Tab switching
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + 'Section').style.display = 'block';
+            
+            // Add active class to clicked button
+            event.target.closest('.tab-button').classList.add('active');
+        }
+        
+        // Generate time tables
+        function generateTimeTables() {
+            generateTimeTable('timeTableA', 1, 15);
+            generateTimeTable('timeTableB', 16, 31);
+        }
+        
+        function generateTimeTable(tableId, startDay, endDay) {
+            const tableBody = document.getElementById(tableId);
+            tableBody.innerHTML = '';
+            
+            for (let day = startDay; day <= endDay; day++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-2 border text-center">${day}</td>
+                    <td class="p-2 border">
+                        <input type="time" class="time-input w-full" id="${tableId}_in1_${day}" onchange="checkTime(this)">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="time" class="time-input w-full" id="${tableId}_out1_${day}" onchange="checkTime(this)">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="time" class="time-input w-full" id="${tableId}_in2_${day}" onchange="checkTime(this)">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="time" class="time-input w-full" id="${tableId}_out2_${day}" onchange="checkTime(this)">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="${tableId}_remarks_${day}" placeholder="Catatan">
+                    </td>
+                    <td class="p-2 border text-center">
+                        <input type="checkbox" id="${tableId}_sign_${day}">
+                    </td>
                 `;
+                tableBody.appendChild(row);
+            }
+        }
+        
+        function generateVehicleLogTable() {
+            const tableBody = document.getElementById('vehicleLogTable');
+            tableBody.innerHTML = '';
+            
+            for (let i = 1; i <= 15; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="p-2 border">
+                        <input type="date" class="time-input w-full" id="date_${i}">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="time" class="time-input w-full" id="depart_${i}">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="time" class="time-input w-full" id="return_${i}">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="driver_${i}" placeholder="Nama">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="purpose_${i}" placeholder="Tujuan">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="approver_${i}" placeholder="Pelulus">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="user_${i}" placeholder="Pengguna">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="number" class="time-input w-full" id="endOdo_${i}" placeholder="km" onchange="calculateDistance(${i})">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="number" class="time-input w-full" id="distance_${i}" readonly placeholder="km">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="receipt_${i}" placeholder="No. Resit">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="number" class="time-input w-full" id="liters_${i}" placeholder="L" onchange="calculateTotalCost()">
+                    </td>
+                    <td class="p-2 border">
+                        <input type="text" class="time-input w-full" id="notes_${i}" placeholder="Nota">
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Time validation and highlighting
+        function checkTime(input) {
+            const time = input.value;
+            if (!time) return;
+            
+            const [hours, minutes] = time.split(':').map(Number);
+            const totalMinutes = hours * 60 + minutes;
+            
+            // Remove existing classes
+            input.classList.remove('late-time', 'ot-time');
+            
+            // Check if late (after 9:00 AM)
+            if (totalMinutes > 540) { // 9:00 AM = 540 minutes
+                input.classList.add('late-time');
+            }
+            
+            // Check if OT (before 7:00 AM or after 4:30 PM)
+            if (totalMinutes < 420 || totalMinutes > 990) { // 7:00 AM = 420, 4:30 PM = 990
+                input.classList.add('ot-time');
+            }
+        }
+        
+        // Distance calculation
+        function calculateDistance(rowNumber) {
+            const startOdo = parseFloat(document.getElementById('startOdo').value) || 0;
+            const endOdo = parseFloat(document.getElementById(`endOdo_${rowNumber}`).value) || 0;
+            const distance = endOdo - startOdo;
+            
+            if (distance > 0) {
+                document.getElementById(`distance_${rowNumber}`).value = distance;
+                // Update start odometer for next calculation
+                document.getElementById('startOdo').value = endOdo;
+            }
+        }
+        
+        // Calculate total fuel cost
+        function calculateTotalCost() {
+            let totalLiters = 0;
+            const fuelPrice = 2.05; // Average fuel price in Malaysia
+            
+            for (let i = 1; i <= 15; i++) {
+                const liters = parseFloat(document.getElementById(`liters_${i}`).value) || 0;
+                totalLiters += liters;
+            }
+            
+            const totalCost = totalLiters * fuelPrice;
+            document.getElementById('totalFuelCost').textContent = totalCost.toFixed(2);
+        }
+        
+        // File upload handling
+        function handleFileSelect(event, type) {
+            const files = event.target.files;
+            handleFiles(files, type);
+        }
+        
+        function handleDrop(event, type) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            handleFiles(files, type);
+        }
+        
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+        
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+        
+        function handleFiles(files, type) {
+            const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            
+            for (let file of files) {
+                if (!validTypes.includes(file.type)) {
+                    alert('Format fail tidak sah. Sila pilih JPG, PNG atau PDF.');
+                    continue;
+                }
+                
+                if (file.size > maxSize) {
+                    alert('Fail terlalu besar. Saiz maksimum ialah 5MB.');
+                    continue;
+                }
+                
+                // Add to uploaded files array
+                uploadedFiles[type].push({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    file: file,
+                    uploadTime: new Date().toISOString()
+                });
+                
+                // Display uploaded file
+                displayUploadedFile(file, type);
+            }
+        }
+        
+        function displayUploadedFile(file, type) {
+            const listId = type + 'ReceiptsList';
+            const listElement = document.getElementById(listId);
+            
+            const fileItem = document.createElement('div');
+            fileItem.className = 'flex items-center justify-between p-3 bg-gray-50 rounded-lg';
+            fileItem.innerHTML = `
+                <div class="flex items-center space-x-3">
+                    <i class="fas ${getFileIcon(file.type)} text-blue-500"></i>
+                    <div>
+                        <p class="font-medium text-sm">${file.name}</p>
+                        <p class="text-xs text-gray-500">${formatFileSize(file.size)}</p>
+                    </div>
+                </div>
+                <button onclick="removeFile('${type}', '${file.name}')" class="text-red-500 hover:text-red-700">
+                    <i class="fas fa-trash"></i>
+                </button>
+            `;
+            
+            listElement.appendChild(fileItem);
+        }
+        
+        function getFileIcon(fileType) {
+            if (fileType.includes('image')) return 'fa-image';
+            if (fileType.includes('pdf')) return 'fa-file-pdf';
+            return 'fa-file';
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        function removeFile(type, fileName) {
+            uploadedFiles[type] = uploadedFiles[type].filter(file => file.name !== fileName);
+            
+            // Refresh the display
+            const listId = type + 'ReceiptsList';
+            const listElement = document.getElementById(listId);
+            listElement.innerHTML = '';
+            
+            uploadedFiles[type].forEach(file => {
+                displayUploadedFile(file, type);
             });
         }
-
-        document.getElementById('resit-minyak').onchange = () => uploadFile('resit-minyak', 'resits');
-        document.getElementById('resit-tng').onchange = () => uploadFile('resit-tng', 'resits');
-        document.getElementById('resit-odo').onchange = () => uploadFile('resit-odo', 'resits');
-
-        window.onload = () => {
-            generateTable('table-a', 1, 15);
-            generateTable('table-b', 16, 31);
-            updateClock();
-        };
+        
+        // Save functions
+        async function saveTimeCard() {
+            if (!currentUser) {
+                showNotification('Sila log masuk terlebih dahulu.', 'error');
+                return;
+            }
+            
+            try {
+                const timeCardData = {
+                    user_id: currentUser.id,
+                    month: document.getElementById('abulan').value,
+                    year: new Date().getFullYear(),
+                    side_a_no: document.getElementById('ano').value,
+                    side_a_name: document.getElementById('aname').value,
+                    side_a_department: document.getElementById('adept').value,
+                    side_a_section: document.getElementById('abahagian').value,
+                    side_a_month: document.getElementById('abulan').value,
+                    side_b_no: document.getElementById('bno').value,
+                    side_b_name: document.getElementById('bname').value,
+                    side_b_department: document.getElementById('bdept').value,
+                    side_b_section: document.getElementById('bbahagian').value,
+                    side_b_month: document.getElementById('bbulan').value,
+                    time_entries: getTimeTableData(),
+                    total_hours: calculateTotalHours(),
+                    total_overtime_hours: calculateOvertimeHours(),
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data, error } = await supabase
+                    .from('time_cards')
+                    .insert([timeCardData]);
+                
+                if (error) throw error;
+                
+                showNotification('Kad masa berjaya disimpan!', 'success');
+            } catch (error) {
+                console.error('Error saving time card:', error);
+                showNotification('Ralat semasa menyimpan kad masa: ' + error.message, 'error');
+            }
+        }
+        
+        function getTimeTableData() {
+            const entries = [];
+            
+            // Side A (Days 1-15)
+            for (let day = 1; day <= 15; day++) {
+                const entry = {
+                    day: day,
+                    side: 'A',
+                    in1: document.getElementById(`timeTableA_in1_${day}`).value,
+                    out1: document.getElementById(`timeTableA_out1_${day}`).value,
+                    in2: document.getElementById(`timeTableA_in2_${day}`).value,
+                    out2: document.getElementById(`timeTableA_out2_${day}`).value,
+                    remarks: document.getElementById(`timeTableA_remarks_${day}`).value,
+                    signed: document.getElementById(`timeTableA_sign_${day}`).checked,
+                    late_minutes: calculateLateMinutes(document.getElementById(`timeTableA_in1_${day}`).value),
+                    overtime_minutes: calculateOvertimeMinutes(
+                        document.getElementById(`timeTableA_in1_${day}`).value,
+                        document.getElementById(`timeTableA_out2_${day}`).value
+                    )
+                };
+                entries.push(entry);
+            }
+            
+            // Side B (Days 16-31)
+            for (let day = 16; day <= 31; day++) {
+                const entry = {
+                    day: day,
+                    side: 'B',
+                    in1: document.getElementById(`timeTableB_in1_${day}`).value,
+                    out1: document.getElementById(`timeTableB_out1_${day}`).value,
+                    in2: document.getElementById(`timeTableB_in2_${day}`).value,
+                    out2: document.getElementById(`timeTableB_out2_${day}`).value,
+                    remarks: document.getElementById(`timeTableB_remarks_${day}`).value,
+                    signed: document.getElementById(`timeTableB_sign_${day}`).checked,
+                    late_minutes: calculateLateMinutes(document.getElementById(`timeTableB_in1_${day}`).value),
+                    overtime_minutes: calculateOvertimeMinutes(
+                        document.getElementById(`timeTableB_in1_${day}`).value,
+                        document.getElementById(`timeTableB_out2_${day}`).value
+                    )
+                };
+                entries.push(entry);
+            }
+            
+            return entries;
+        }
+        
+        async function saveVehicleLog() {
+            if (!currentUser) {
+                showNotification('Sila log masuk terlebih dahulu.', 'error');
+                return;
+            }
+            
+            try {
+                // First save the vehicle log header
+                const vehicleLogData = {
+                    user_id: currentUser.id,
+                    record_month: document.getElementById('recordMonth').value,
+                    year: new Date().getFullYear(),
+                    car_reg_no: document.getElementById('carRegNo').value,
+                    start_odo: parseFloat(document.getElementById('startOdo').value) || 0,
+                    department: document.getElementById('department').value,
+                    total_distance: calculateTotalDistance(),
+                    total_fuel_cost: parseFloat(document.getElementById('totalFuelCost').textContent) || 0,
+                    total_liters: calculateTotalLiters(),
+                    created_at: new Date().toISOString()
+                };
+                
+                const { data: logData, error: logError } = await supabase
+                    .from('vehicle_logs')
+                    .insert([vehicleLogData])
+                    .select();
+                
+                if (logError) throw logError;
+                
+                // Then save the journey details
+                const vehicleLogId = logData[0].id;
+                const journeys = getVehicleLogData();
+                
+                for (const journey of journeys) {
+                    journey.vehicle_log_id = vehicleLogId;
+                    const { error: journeyError } = await supabase
+                        .from('vehicle_journeys')
+                        .insert([journey]);
+                    
+                    if (journeyError) throw journeyError;
+                }
+                
+                // Save uploaded files
+                await saveUploadedFiles(vehicleLogId);
+                
+                showNotification('Log kenderaan berjaya disimpan!', 'success');
+            } catch (error) {
+                console.error('Error saving vehicle log:', error);
+                showNotification('Ralat semasa menyimpan log kenderaan: ' + error.message, 'error');
+            }
+        }
+        
+        function getVehicleLogData() {
+            const journeys = [];
+            
+            for (let i = 1; i <= 15; i++) {
+                const journey = {
+                    date: document.getElementById(`date_${i}`).value,
+                    depart_time: document.getElementById(`depart_${i}`).value,
+                    return_time: document.getElementById(`return_${i}`).value,
+                    driver: document.getElementById(`driver_${i}`).value,
+                    purpose: document.getElementById(`purpose_${i}`).value,
+                    approver: document.getElementById(`approver_${i}`).value,
+                    user: document.getElementById(`user_${i}`).value,
+                    end_odo: parseFloat(document.getElementById(`endOdo_${i}`).value) || 0,
+                    distance: parseFloat(document.getElementById(`distance_${i}`).value) || 0,
+                    receipt_no: document.getElementById(`receipt_${i}`).value,
+                    liters: parseFloat(document.getElementById(`liters_${i}`).value) || 0,
+                    notes: document.getElementById(`notes_${i}`).value
+                };
+                
+                // Only add if there's data
+                if (journey.date || journey.driver || journey.purpose) {
+                    journeys.push(journey);
+                }
+            }
+            
+            return journeys;
+        }
+        
+        // Additional helper functions
+        function calculateLateMinutes(timeIn) {
+            if (!timeIn) return 0;
+            const [hours, minutes] = timeIn.split(':').map(Number);
+            const workStart = 8 * 60; // 8:00 AM in minutes
+            const arrivalTime = hours * 60 + minutes;
+            return Math.max(0, arrivalTime - workStart);
+        }
+        
+        function calculateOvertimeMinutes(timeIn, timeOut) {
+            if (!timeIn || !timeOut) return 0;
+            const [inHours, inMinutes] = timeIn.split(':').map(Number);
+            const [outHours, outMinutes] = timeOut.split(':').map(Number);
+            
+            const workStart = 8 * 60; // 8:00 AM
+            const workEnd = 17 * 60; // 5:00 PM
+            const lunchStart = 12 * 60; // 12:00 PM
+            const lunchEnd = 13 * 60; // 1:00 PM
+            
+            const inTime = inHours * 60 + inMinutes;
+            const outTime = outHours * 60 + outMinutes;
+            
+            let overtime = 0;
+            
+            // Before work hours
+            if (inTime < workStart) {
+                overtime += workStart - inTime;
+            }
+            
+            // After work hours
+            if (outTime > workEnd) {
+                overtime += outTime - workEnd;
+            }
+            
+            return overtime;
+        }
+        
+        function calculateTotalHours() {
+            let totalMinutes = 0;
+            const entries = getTimeTableData();
+            
+            entries.forEach(entry => {
+                if (entry.in1 && entry.out1) {
+                    const [inHours, inMinutes] = entry.in1.split(':').map(Number);
+                    const [outHours, outMinutes] = entry.out1.split(':').map(Number);
+                    totalMinutes += (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes);
+                }
+                
+                if (entry.in2 && entry.out2) {
+                    const [inHours, inMinutes] = entry.in2.split(':').map(Number);
+                    const [outHours, outMinutes] = entry.out2.split(':').map(Number);
+                    totalMinutes += (outHours * 60 + outMinutes) - (inHours * 60 + inMinutes);
+                }
+            });
+            
+            return (totalMinutes / 60).toFixed(2);
+        }
+        
+        function calculateOvertimeHours() {
+            let totalOvertime = 0;
+            const entries = getTimeTableData();
+            
+            entries.forEach(entry => {
+                totalOvertime += entry.overtime_minutes;
+            });
+            
+            return (totalOvertime / 60).toFixed(2);
+        }
+        
+        function calculateTotalDistance() {
+            let totalDistance = 0;
+            for (let i = 1; i <= 15; i++) {
+                const distance = parseFloat(document.getElementById(`distance_${i}`).value) || 0;
+                totalDistance += distance;
+            }
+            return totalDistance;
+        }
+        
+        function calculateTotalLiters() {
+            let totalLiters = 0;
+            for (let i = 1; i <= 15; i++) {
+                const liters = parseFloat(document.getElementById(`liters_${i}`).value) || 0;
+                totalLiters += liters;
+            }
+            return totalLiters;
+        }
+        
+        // Notification system
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            const existingNotification = document.querySelector('.notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `notification fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 transition-all duration-300 transform translate-x-full`;
+            
+            // Set color based on type
+            switch (type) {
+                case 'success':
+                    notification.className += ' bg-green-500 text-white';
+                    break;
+                case 'error':
+                    notification.className += ' bg-red-500 text-white';
+                    break;
+                case 'warning':
+                    notification.className += ' bg-yellow-500 text-white';
+                    break;
+                default:
+                    notification.className += ' bg-blue-500 text-white';
+            }
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'} mr-2"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+                notification.classList.add('translate-x-0');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 5000);
+        }
+        
+        // File upload to Supabase Storage
+        async function saveUploadedFiles(vehicleLogId) {
+            for (const [type, files] of Object.entries(uploadedFiles)) {
+                for (const file of files) {
+                    try {
+                        const filePath = `${currentUser.id}/${vehicleLogId}/${Date.now()}-${file.name}`;
+                        
+                        const { error: uploadError } = await supabase.storage
+                            .from('documents')
+                            .upload(filePath, file.file);
+                        
+                        if (uploadError) throw uploadError;
+                        
+                        // Save file metadata to database
+                        const { error: dbError } = await supabase
+                            .from('documents')
+                            .insert([{
+                                user_id: currentUser.id,
+                                vehicle_log_id: vehicleLogId,
+                                document_type: type,
+                                file_name: file.name,
+                                file_path: filePath,
+                                file_size: file.size,
+                                mime_type: file.type,
+                                created_at: new Date().toISOString()
+                            }]);
+                        
+                        if (dbError) throw dbError;
+                        
+                    } catch (error) {
+                        console.error('Error uploading file:', error);
+                        showNotification('Ralat memuat naik fail: ' + file.name, 'error');
+                    }
+                }
+            }
+        }
+        
+        // Load existing data
+        async function loadTimeCardData(month, year) {
+            try {
+                const { data, error } = await supabase
+                    .from('time_cards')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .eq('month', month)
+                    .eq('year', year)
+                    .single();
+                
+                if (error && error.code !== 'PGRST116') { // Not found error
+                    throw error;
+                }
+                
+                if (data) {
+                    // Populate form fields
+                    document.getElementById('ano').value = data.side_a_no || '';
+                    document.getElementById('aname').value = data.side_a_name || '';
+                    document.getElementById('adept').value = data.side_a_department || '';
+                    document.getElementById('abahagian').value = data.side_a_section || '';
+                    document.getElementById('abulan').value = data.side_a_month || '';
+                    document.getElementById('bno').value = data.side_b_no || '';
+                    document.getElementById('bname').value = data.side_b_name || '';
+                    document.getElementById('bdept').value = data.side_b_department || '';
+                    document.getElementById('bbahagian').value = data.side_b_section || '';
+                    document.getElementById('bbulan').value = data.side_b_month || '';
+                    
+                    // Populate time entries
+                    data.time_entries.forEach(entry => {
+                        const tableId = entry.side === 'A' ? 'timeTableA' : 'timeTableB';
+                        document.getElementById(`${tableId}_in1_${entry.day}`).value = entry.in1 || '';
+                        document.getElementById(`${tableId}_out1_${entry.day}`).value = entry.out1 || '';
+                        document.getElementById(`${tableId}_in2_${entry.day}`).value = entry.in2 || '';
+                        document.getElementById(`${tableId}_out2_${entry.day}`).value = entry.out2 || '';
+                        document.getElementById(`${tableId}_remarks_${entry.day}`).value = entry.remarks || '';
+                        document.getElementById(`${tableId}_sign_${entry.day}`).checked = entry.signed || false;
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading time card data:', error);
+                showNotification('Ralat memuatkan data kad masa', 'error');
+            }
+        }
+        
+        // Initialize profile on login
+        async function createOrUpdateProfile() {
+            if (!currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .upsert([{
+                        id: currentUser.id,
+                        email: currentUser.email,
+                        full_name: currentUser.user_metadata?.full_name || '',
+                        updated_at: new Date().toISOString()
+                    }])
+                    .select();
+                
+                if (error) throw error;
+                
+            } catch (error) {
+                console.error('Error creating/updating profile:', error);
+            }
+        }
+        
+        // Update auth handlers
+        async function handleGoogleSignIn(response) {
+            try {
+                const { data, error } = await supabase.auth.signInWithIdToken({
+                    provider: 'google',
+                    token: response.credential
+                });
+                
+                if (error) throw error;
+                
+                currentUser = data.user;
+                await createOrUpdateProfile();
+                showMainApp();
+                showProfile();
+            } catch (error) {
+                console.error('Error signing in:', error);
+                showNotification('Ralat semasa log masuk: ' + error.message, 'error');
+            }
+        }
+        
+        async function checkAuthStatus() {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (session) {
+                    currentUser = session.user;
+                    await createOrUpdateProfile();
+                    showMainApp();
+                    showProfile();
+                } else {
+                    showLoginSection();
+                }
+            } catch (error) {
+                console.error('Error checking auth status:', error);
+                showLoginSection();
+            }
+        }
     </script>
 </body>
 </html>
