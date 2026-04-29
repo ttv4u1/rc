@@ -281,20 +281,52 @@
             });
         }
 
-        async function logout() {
-            await supabase.auth.signOut();
-            window.location.reload();
+        async function loginGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            // Jika anda run di komputer sendiri (Live Server), guna localhost
+            // Jika sudah upload ke internet, guna URL website anda
+            redirectTo: window.location.origin 
         }
+    });
 
-        // Handle Session
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (session) {
-                document.getElementById('login-btn').classList.add('hidden');
-                document.getElementById('user-profile').classList.remove('hide-profile');
-                document.getElementById('user-profile').classList.add('flex');
-                document.getElementById('user-avatar').src = session.user.user_metadata.avatar_url;
-            }
-        });
+    if (error) {
+        console.error('Error logging in:', error.message);
+        alert('Gagal log masuk: ' + error.message);
+    }
+}
+
+// Pastikan sesi dikesan apabila page di'refresh'
+async function checkUser() {
+    const { data: { session } } = await supabase.auth.getSession();
+    updateUI(session);
+}
+
+function updateUI(session) {
+    const loginBtn = document.getElementById('login-btn');
+    const userProfile = document.getElementById('user-profile');
+    const userAvatar = document.getElementById('user-avatar');
+
+    if (session) {
+        loginBtn.classList.add('hidden');
+        userProfile.classList.remove('hide-profile');
+        userProfile.classList.add('flex');
+        userAvatar.src = session.user.user_metadata.avatar_url;
+    } else {
+        loginBtn.classList.remove('hidden');
+        userProfile.classList.add('hide-profile');
+        userProfile.classList.remove('flex');
+    }
+}
+
+// Jalankan checkUser semasa page load
+checkUser();
+
+// Handle perubahan status auth (login/logout)
+supabase.auth.onAuthStateChange((event, session) => {
+    updateUI(session);
+});
 
         // Auto-hide Profile on scroll
         window.onscroll = function() {
