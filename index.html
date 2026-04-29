@@ -43,7 +43,7 @@
     <header class="p-4 glass-card m-4 flex flex-wrap justify-between items-center">
         <div class="flex items-center space-x-4">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Coat_of_arms_of_Malaysia.svg/1200px-Coat_of_arms_of_Malaysia.svg.png" class="h-16" alt="Jata Malaysia">
-            <h1 class="hidden md:block font-bold text-slate-800 uppercase">Sistem E-Log Pintar</h1>
+            <h1 class="hidden md:block font-bold text-slate-800 uppercase text-sm">Sistem E-Log Pintar</h1>
         </div>
         <div class="text-center">
             <div id="realtime-clock" class="text-blue-600 font-mono font-bold text-lg"></div>
@@ -62,16 +62,16 @@
     <main class="p-4 space-y-8">
         <!-- SEKSYEN WFB -->
         <section class="glass-card p-6 overflow-x-auto">
-            <h2 class="text-2xl font-bold mb-4 border-b-2 border-blue-500 inline-block text-blue-700">KAD WAKTU WFB</h2>
+            <h2 class="text-xl font-bold mb-4 border-b-2 border-blue-500 inline-block text-blue-700">KAD WAKTU WFB</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div><h3 class="font-bold mb-2">BAHAGIAN A (1-15hb)</h3><table class="w-full text-xs border"><thead class="bg-slate-800 text-white"><tr><th class="border p-1">TGL</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">NOTA</th></tr></thead><tbody id="table-a"></tbody></table></div>
-                <div><h3 class="font-bold mb-2">BAHAGIAN B (16-31hb)</h3><table class="w-full text-xs border"><thead class="bg-slate-800 text-white"><tr><th class="border p-1">TGL</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">NOTA</th></tr></thead><tbody id="table-b"></tbody></table></div>
+                <div><h3 class="font-bold mb-2">BAHAGIAN A (1-15hb)</h3><table class="w-full text-[10px] border"><thead class="bg-slate-800 text-white"><tr><th class="border p-1">TGL</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">NOTA</th></tr></thead><tbody id="table-a"></tbody></table></div>
+                <div><h3 class="font-bold mb-2">BAHAGIAN B (16-31hb)</h3><table class="w-full text-[10px] border"><thead class="bg-slate-800 text-white"><tr><th class="border p-1">TGL</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">MASUK</th><th class="border p-1">KELUAR</th><th class="border p-1">NOTA</th></tr></thead><tbody id="table-b"></tbody></table></div>
             </div>
         </section>
 
         <!-- SEKSYEN LOG KENDERAAN -->
         <section class="glass-card p-6">
-            <h2 class="text-2xl font-bold mb-4 border-b-2 border-green-500 inline-block text-green-700">LOG KENDERAAN KERAJAAN</h2>
+            <h2 class="text-xl font-bold mb-4 border-b-2 border-green-500 inline-block text-green-700">LOG KENDERAAN KERAJAAN</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-green-50 p-4 rounded-xl">
                 <div><label class="text-xs font-bold">Bulan Log</label><input type="month" id="log-bulan" class="w-full p-2 border rounded"></div>
                 <div><label class="text-xs font-bold">No. Pendaftaran</label><input type="text" class="w-full p-2 border rounded"></div>
@@ -81,10 +81,10 @@
 
             <div class="flex justify-between items-center p-4 bg-slate-800 text-white rounded-lg mb-4">
                 <div>
-                    <span class="text-sm uppercase">Jarak Perjalanan:</span>
+                    <span class="text-xs uppercase">Jarak Perjalanan:</span>
                     <span id="jarak-calc" class="text-2xl font-bold text-yellow-400 ml-2">0</span> KM
                 </div>
-                <button onclick="simpanLogKenderaan()" class="btn-realistic bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-bold text-white uppercase tracking-wider">
+                <button onclick="simpanLogKenderaan()" class="btn-realistic bg-green-500 hover:bg-green-600 px-6 py-2 rounded-xl font-bold text-white uppercase text-xs tracking-wider">
                     <i class="fas fa-cloud-upload-alt mr-2"></i> Simpan Rekod
                 </button>
             </div>
@@ -108,6 +108,14 @@
                 <input type="file" id="resit-odo" class="hidden">
             </div>
         </section>
+
+        <!-- SEKSYEN GALERI (TAMBAHAN PENTING) -->
+        <section class="glass-card p-6">
+            <h2 class="text-xl font-bold mb-4 border-b-2 border-purple-500 inline-block text-purple-700">GALERI DOKUMEN</h2>
+            <div id="gallery" class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                <p class="text-slate-400 text-sm italic col-span-full">Tiada dokumen dimuat naik lagi.</p>
+            </div>
+        </section>
     </main>
 
     <script>
@@ -119,7 +127,6 @@
         // 2. AUTH LOGIC
         async function loginGoogle() {
             try {
-                // redirectTo akan automatik pilih localhost jika anda test di komputer, atau github jika di internet
                 const targetURL = window.location.origin + window.location.pathname;
                 const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
@@ -146,6 +153,7 @@
                 userProfile.classList.remove('hide-profile');
                 userProfile.classList.add('flex');
                 userAvatar.src = session.user.user_metadata.avatar_url;
+                muatTurunGaleri(); // Panggil Galeri
             } else {
                 loginBtn.classList.remove('hidden');
                 userProfile.classList.add('hide-profile');
@@ -153,7 +161,7 @@
             }
         });
 
-        // 3. UI LOGIC
+        // 3. UI LOGIC (Jam & Jadual)
         function updateClock() {
             const now = new Date();
             document.getElementById('realtime-clock').innerText = now.toLocaleDateString('ms-MY', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' }).toUpperCase();
@@ -164,7 +172,7 @@
             const tbody = document.getElementById(id);
             if(!tbody) return;
             for (let i = start; i <= end; i++) {
-                tbody.innerHTML += `<tr><td class="border p-1 text-center font-bold">${i}</td><td class="border p-0"><input type="time" onchange="checkTime(this)" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="text" class="w-full p-1 border-none bg-transparent"></td></tr>`;
+                tbody.innerHTML += `<tr><td class="border p-1 text-center font-bold">${i}</td><td class="border p-0"><input type="time" onchange="checkTime(this)" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="time" class="w-full p-1 border-none bg-transparent"></td><td class="border p-0"><input type="text" class="w-full p-1 border-none bg-transparent text-[8px]"></td></tr>`;
             }
         }
 
@@ -205,7 +213,7 @@
             else alert("✅ Rekod berjaya disimpan!");
         }
 
-        // 6. FILE UPLOAD
+        // 6. STORAGE & GALLERY LOGIC
         async function uploadFile(inputId, bucket) {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return alert("Sila login dahulu!");
@@ -216,8 +224,41 @@
             const path = `${session.user.id}/${Date.now()}-${file.name}`;
             const { error } = await supabase.storage.from(bucket).upload(path, file);
 
-            if (error) alert("Gagal Upload: " + error.message);
-            else alert("✅ Fail berjaya dihantar!");
+            if (error) {
+                alert("Gagal Upload: " + error.message);
+            } else {
+                alert("✅ Fail berjaya dihantar!");
+                muatTurunGaleri(); // Refresh galeri
+            }
+        }
+
+        async function muatTurunGaleri() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) return;
+
+            const { data, error } = await supabase.storage
+                .from('resits')
+                .list(session.user.id + '/');
+
+            if (error || !data) return;
+
+            const galleryDiv = document.getElementById('gallery');
+            galleryDiv.innerHTML = ''; 
+
+            data.forEach(file => {
+                const { data: urlData } = supabase.storage
+                    .from('resits')
+                    .getPublicUrl(`${session.user.id}/${file.name}`);
+
+                galleryDiv.innerHTML += `
+                    <div class="relative group rounded border overflow-hidden bg-white shadow-sm">
+                        <img src="${urlData.publicUrl}" class="h-24 w-full object-cover">
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <a href="${urlData.publicUrl}" target="_blank" class="text-[10px] text-white underline font-bold">PAPAR</a>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
         document.getElementById('resit-minyak').onchange = () => uploadFile('resit-minyak', 'resits');
