@@ -2,639 +2,493 @@
 <html lang="ms">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S-ELIPT: Sistem e-Log Kerajaan Malaysia</title>
-    <!-- Favicon Note Icon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff6600'><path d='M3 3h12l6 6v12H3z' opacity='.3'/><path d='M14 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8l-6-6zm-1 2.5l5.5 5.5H13V4.5zM4 20V4h8v7h7v9H4zm3-8h10v2H7zm0 4h7v2H7z'/></svg>">
-    <!-- TailwindCSS & FontAwesome -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Bersepadu WFB & Log Kenderaan</title>
+    <!-- Favicon Note -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📝</text></svg>">
+    
+    <!-- Libraries CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
     <style>
-        /* CSS Animasi dan Visual Realistik */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap');
+        
         body {
-            background-image: url('https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?auto=format&fit=crop&q=80&w=1920&ixlib=rb-4.0.3');
+            font-family: 'Poppins', sans-serif;
+            background: url('https://images.unsplash.com/photo-1542451313056-b7c8e626645f?q=80&w=2574&auto=format&fit=crop') no-repeat center center fixed; /* Anime Cyber Landscape placeholder */
             background-size: cover;
-            background-attachment: fixed;
-            background-position: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: #fff;
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* Overlay Hitam Lutsinar Supaya Teks Nampak (Luxury Feel) */
+        .glass-bg {
+            background: rgba(18, 25, 43, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 215, 0, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
         }
         
-        .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+        .luxury-text {
+            background: linear-gradient(90deg, #F9D423 0%, #FF4E50 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .realistic-btn {
-            transition: all 0.2s ease-in-out;
-            background: linear-gradient(145deg, #1f6fd9, #0e52b2);
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3), inset 0 2px 2px rgba(255, 255, 255, 0.3);
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            border: none;
-        }
-
-        .realistic-btn:hover {
-            transform: translateY(-2px);
-            background: linear-gradient(145deg, #2a82f3, #1562cb);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.4);
-        }
-
-        .realistic-btn:active {
-            transform: scale(0.95);
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.4), inset 0 4px 6px rgba(0,0,0,0.4);
-        }
-        
-        .green-btn { background: linear-gradient(145deg, #10b981, #047857); }
-        .red-btn { background: linear-gradient(145deg, #ef4444, #b91c1c); }
-
-        .time-red { color: #ff5252 !important; font-weight: bold; text-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
-        .time-ot { color: #facc15 !important; font-weight: bold; } /* Kuning utk OT */
-        
-        .glass-input {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 8px;
+        /* Input / Table Styles */
+        .modern-input {
+            background: rgba(255, 255, 255, 0.1) !important;
+            border: 1px solid rgba(255, 215, 0, 0.3) !important;
+            color: white !important;
             border-radius: 4px;
+            padding: 4px;
         }
 
-        /* Print styles / Paper feeling within glassmorphism */
-        .wfb-table th { background-color: rgba(59, 130, 246, 0.4); text-align: center; }
-        .wfb-table td, .wfb-table th { border: 1px solid rgba(255, 255, 255, 0.15); padding: 4px; font-size: 0.85rem;}
-        .log-table th { background-color: rgba(139, 92, 246, 0.4); }
-
-        #profileSection {
-            transition: opacity 0.5s;
-            opacity: 1;
+        table { border-collapse: collapse; width: 100%; margin-top: 10px;}
+        th {
+            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+            border: 1px solid #4b5563; padding: 6px; text-align: center; color: #fbbf24;
+            font-size: 0.85rem;
         }
+        td { border: 1px solid #374151; padding: 4px; text-align: center; background: rgba(0,0,0,0.4); }
+
+        /* Button 3D Realistik & Warnawarni */
+        .btn-3d {
+            transition: all 0.2s ease-in-out;
+            background: linear-gradient(145deg, #1e40af, #3b82f6);
+            border: 1px solid #1d4ed8;
+            box-shadow: inset 0px 1px 0px rgba(255,255,255,0.4), 0px 4px 6px rgba(0,0,0,0.4);
+            border-radius: 6px; color: white; cursor: pointer; padding: 8px 16px;
+        }
+        .btn-3d:active {
+            transform: scale(0.95); box-shadow: inset 0px 4px 6px rgba(0,0,0,0.6);
+        }
+        .btn-gold { background: linear-gradient(145deg, #ca8a04, #facc15); border: 1px solid #a16207; color: black; font-weight: bold;}
+        .btn-green { background: linear-gradient(145deg, #166534, #22c55e); border: 1px solid #14532d; }
+
+        /* Logic Flags */
+        .red-flag { background-color: rgba(239, 68, 68, 0.4) !important; color: #ffcccc !important; border: 1px solid #ef4444; }
+        .ot-flag { background-color: rgba(59, 130, 246, 0.4) !important; border: 1px solid #3b82f6;} /* Biru = OT */
+        
+        .fade-in { animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Logos Image Replace Below with Real Assets (Used Initials via Base64 to fulfill standalone setup without missing image files) */
     </style>
 </head>
-<body class="min-h-screen relative pb-10">
+<body class="p-2 sm:p-4 pb-20 min-h-screen text-sm">
 
-    <!-- OVERLAY UTK BAGI NAK TERANGKAN LAGI ANIME BG -->
-    <div class="fixed inset-0 z-[-1] bg-black opacity-30"></div>
+    <!-- TOP NAVBAR NAVIGATION -->
+    <nav class="glass-bg p-3 flex flex-wrap justify-between items-center sticky top-0 z-50 mb-4 rounded-xl">
+        <div class="flex items-center gap-3 w-full md:w-auto justify-center md:justify-start">
+            <div class="w-10 h-10 bg-gray-100 rounded-full flex justify-center items-center text-black font-bold border-2 border-yellow-500 shadow-[0_0_15px_gold]">MY</div>
+            <div class="w-10 h-10 bg-blue-900 rounded-full flex justify-center items-center font-bold border-2 border-yellow-500">JAB</div>
+            <div class="w-10 h-10 bg-red-900 rounded-full flex justify-center items-center font-bold border-2 border-yellow-500 text-xs text-center leading-tight">U-KT</div>
+            <div class="ml-2 hidden sm:block">
+                <h1 class="text-xl font-bold uppercase luxury-text tracking-widest text-shadow">Penguatkuasaan Logbook</h1>
+                <p class="text-xs text-gray-300">Versi v4.2.5 [Pro/Gov]</p>
+            </div>
+        </div>
 
-    <div class="container mx-auto px-2 py-4 mt-2">
-        <!-- HEADER LOGOS -->
-        <header class="glass rounded-xl p-4 flex flex-col md:flex-row items-center justify-between mb-6 z-50">
-            <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                <!-- Logos -->
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/26/Coat_of_arms_of_Malaysia.svg" alt="Jata" class="h-16 w-16 drop-shadow-lg filter hover:scale-110 transition-transform">
-                <img src="https://cdn-icons-png.flaticon.com/512/3233/3233483.png" alt="Jabatan" class="h-12 w-12 invert opacity-90 filter drop-shadow">
-                <img src="https://cdn-icons-png.flaticon.com/512/8207/8207603.png" alt="Penguatkuasaan" class="h-12 w-12 drop-shadow filter">
-                <div>
-                    <h1 class="text-2xl font-bold uppercase bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-emerald-300">Sistem Maklumat S-ELIPT</h1>
-                    <p class="text-sm font-light text-gray-300">Sistem Log Bersepadu Pegawai Penguatkuasa | v4.2.1-RevG</p>
+        <div class="mt-3 md:mt-0 flex gap-4 items-center justify-between w-full md:w-auto">
+            <div id="realtime-clock" class="text-green-400 font-bold tracking-widest text-lg drop-shadow-md border border-gray-600 rounded p-1 bg-black/50">--:--</div>
+            <!-- Profil Automatik Tumbuh Hilang -->
+            <div class="relative group cursor-pointer border border-gray-500 rounded p-1">
+                <div class="flex items-center gap-2">
+                    <img id="userProfilePic" src="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 fill=%22white%22 viewBox=%220 0 24 24%22><path d=%22M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z%22/></svg>" width="28" class="rounded-full">
+                    <span id="userNameTxt" class="hidden md:block transition-all max-w-0 overflow-hidden group-hover:max-w-xs truncate ml-1 text-xs text-blue-200">Menunggu Log Masuk...</span>
                 </div>
+                <!-- Dropdown Profil -->
+                <div class="absolute right-0 top-10 mt-1 hidden group-hover:block glass-bg p-2 text-xs rounded min-w-[150px]">
+                     <!-- Google Div (Tunggu setup ID untuk jalan fungsi asal) -->
+                    <div id="g_id_onload" data-client_id="TUKAR_GOOGLE_CLIENT_ID_DI_SINI.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+                    <div class="g_id_signin mb-2" data-type="standard"></div>
+                    <button class="btn-3d bg-red-600 text-xs w-full py-1 text-center" onclick="logoutGoogle()">Log Keluar</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- TAB NAV -->
+    <div class="flex gap-2 mb-4 overflow-x-auto p-1 scrollbar-hide">
+        <button class="btn-3d w-full sm:w-auto min-w-[140px]" onclick="bukaTab('tabWFB')">🕒 KAD WFB (Kerja)</button>
+        <button class="btn-3d btn-green w-full sm:w-auto min-w-[140px]" onclick="bukaTab('tabLogKereta')">🚙 LOG KENDERAAN</button>
+        <button class="btn-3d btn-gold w-full sm:w-auto min-w-[140px]" onclick="bukaTab('tabUpload')">📸 GALERI & RESIT</button>
+    </div>
+
+    <!-- MAIN CONTENT KAD MENCATAT WAKTU (RESPONSIVE GRID) -->
+    <div id="tabWFB" class="glass-bg p-4 mb-8 fade-in">
+        <h2 class="text-xl font-bold luxury-text mb-4">KAD MENCATAT WAKTU KERAJAAN</h2>
+        <div class="text-xs mb-4 text-gray-300">
+            Peraturan WFB: Jam bekerja rasmi max antara <span class="text-green-400">7:30 PG - 6:00 PTG</span>. Melebihi jam 9:00 PG ditanda Merah. Masa < 7:00 PG dikira OT (Lebih Masa).
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
+            <!-- MUKA 1 (Hari 1-15) -->
+            <div class="glass-bg p-2 overflow-x-auto shadow-inner bg-opacity-40 bg-black rounded">
+                <div class="flex gap-2 justify-between mb-2 p-1 border-b border-gray-600 pb-2">
+                    <div>
+                        <div class="font-bold text-yellow-500 mb-1">A No: <input type="text" id="ano_inp" oninput="sinkronSiriNo(this.value)" class="modern-input w-20 ml-2" value="101" /></div>
+                        Nama: <input type="text" class="modern-input w-48 block my-1"/>
+                        Bahagian/Seksyen: <input type="text" class="modern-input w-36 block"/>
+                    </div>
+                    <div>
+                        Bulan: <input type="month" id="bulantab" onchange="binaKad()" class="modern-input w-32 block my-1"/>
+                        Kem./Jab: <input type="text" value="PENGUATKUASAAN" class="modern-input w-32 block"/>
+                    </div>
+                </div>
+                <table class="w-full whitespace-nowrap text-xs">
+                    <thead><tr><th>Tarikh</th><th>M. MASUK</th><th>M. KELUAR</th><th>M. MASUK</th><th>M. KELUAR</th><th>Kenyataan</th><th>T/T</th></tr></thead>
+                    <tbody id="badanWFB1"></tbody>
+                </table>
             </div>
             
-            <div class="flex flex-col items-end">
-                <div class="text-xl font-bold tracking-widest text-emerald-300 shadow-sm" id="realtimeClock">Memuat Masa...</div>
-                
-                <div class="mt-2 flex space-x-2" id="profileSection">
-                    <button onclick="auth.login()" class="realistic-btn green-btn px-4 py-2 rounded text-sm text-white font-semibold">
-                        <i class="fa-brands fa-google mr-2"></i> Log Masuk (Google)
-                    </button>
-                    <button onclick="auth.logout()" class="realistic-btn red-btn px-4 py-2 rounded text-sm text-white font-semibold hidden" id="btnLogout">Log Keluar</button>
+            <!-- MUKA 2 (Hari 16 - Last) -->
+            <div class="glass-bg p-2 overflow-x-auto shadow-inner bg-opacity-40 bg-black rounded">
+                 <div class="flex gap-2 justify-between mb-2 p-1 border-b border-gray-600 pb-2">
+                    <div>
+                        <div class="font-bold text-yellow-500 mb-1">B No: <span id="bno_display" class="bg-gray-800 p-1 px-3 rounded font-bold border border-yellow-800 text-yellow-300">101</span></div>
+                        Nama: <span class="text-gray-400 text-[10px] block mt-2">(rujuk muka satu)</span>
+                    </div>
+                     <div><span class="text-gray-400 text-[10px] block mt-5">(maklumat sync dari muka 1)</span></div>
                 </div>
-                <div id="userInfo" class="text-sm text-cyan-200 mt-1 hidden">Status: Dalam talian</div>
-            </div>
-        </header>
-
-        <!-- NAVIGATION TAB -->
-        <nav class="flex overflow-x-auto space-x-2 mb-4 scrollbar-hide">
-            <button onclick="app.showTab('timesheet')" class="realistic-btn px-6 py-3 rounded-t-xl font-bold rounded-b-sm border-b-4 border-blue-500">KAD WFB MENCATAT WAKTU</button>
-            <button onclick="app.showTab('vehicleLog')" class="realistic-btn px-6 py-3 rounded-t-xl font-bold rounded-b-sm border-b-4 border-purple-500">BUKU LOG KERAJAAN</button>
-            <button onclick="app.showTab('uploadDocs')" class="realistic-btn px-6 py-3 rounded-t-xl font-bold rounded-b-sm border-b-4 border-orange-500">MUAT NAIK DOKUMEN</button>
-            <button onclick="app.showTab('dataViewer')" class="realistic-btn px-6 py-3 rounded-t-xl font-bold rounded-b-sm border-b-4 border-teal-500">VIEWER PANGKALAN DATA</button>
-        </nav>
-
-        <!-- ======================= -->
-        <!-- TAB 1: KAD WAKTU (WFB) -->
-        <!-- ======================= -->
-        <div id="timesheet" class="tab-content">
-            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                
-                <!-- KAD MUKA DEPAN 1-15 -->
-                <div class="glass p-4 rounded-xl flex flex-col h-full shadow-lg">
-                    <div class="text-center mb-4">
-                        <h2 class="text-xl font-extrabold uppercase tracking-wide text-amber-300 drop-shadow-md">KAD MENCATAT WAKTU</h2>
-                        <h3 class="text-lg font-bold text-white uppercase drop-shadow-md">WAKTU FLEKSI BEKERJA (WFB)</h3>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-2 mb-4 text-sm font-semibold">
-                        <div class="flex"><label class="w-16">A No:</label><input type="text" class="glass-input flex-1 uppercase" id="a_no" oninput="app.syncFields()"></div>
-                        <div class="flex"><label class="w-24">BULAN:</label><input type="month" class="glass-input flex-1" id="wfb_bulan"></div>
-                        <div class="flex"><label class="w-16">NAMA:</label><input type="text" class="glass-input flex-1 uppercase" id="wfb_nama"></div>
-                        <div class="flex"><label class="w-24">BAHAGIAN:</label><input type="text" class="glass-input flex-1 uppercase" id="wfb_bahagian"></div>
-                        <div class="flex col-span-2"><label class="w-24">KEM/JAB:</label><input type="text" class="glass-input flex-1 uppercase" value="JABATAN PENGANGKUTAN/KASTAM/PDRM" id="wfb_jabatan"></div>
-                    </div>
-
-                    <div class="overflow-x-auto w-full border border-gray-500 rounded">
-                        <table class="wfb-table w-full whitespace-nowrap text-center">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2">TARIKH</th>
-                                    <th colspan="2">PAGI</th>
-                                    <th colspan="2">PETANG</th>
-                                    <th rowspan="2">KENYATAAN /<br>MASA WFB (9G)</th>
-                                    <th rowspan="2">T/T</th>
-                                </tr>
-                                <tr>
-                                    <th>MASUK</th><th>KELUAR</th><th>MASUK</th><th>KELUAR</th>
-                                </tr>
-                            </thead>
-                            <tbody id="timesheetBodyA">
-                                <!-- Generated by JS for dates 1-15 -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <button class="mt-4 realistic-btn w-full py-2 rounded text-white font-bold" onclick="app.simpanWFB(1, 15)"><i class="fa fa-save"></i> SIMPAN KAD 1 (A)</button>
-                </div>
-
-                <!-- KAD MUKA KEDUA 16-31 -->
-                <div class="glass p-4 rounded-xl flex flex-col h-full shadow-lg">
-                    <div class="text-center mb-4">
-                        <h2 class="text-xl font-extrabold uppercase tracking-wide text-amber-300 drop-shadow-md">KAD MENCATAT WAKTU</h2>
-                        <h3 class="text-lg font-bold text-white uppercase drop-shadow-md">WAKTU FLEKSI BEKERJA (WFB)</h3>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-2 mb-4 text-sm font-semibold opacity-80 cursor-not-allowed">
-                        <div class="flex"><label class="w-16">B No:</label><input type="text" class="glass-input flex-1 uppercase" id="b_no" readonly></div>
-                        <div class="flex"><label class="w-24">BULAN:</label><input type="text" class="glass-input flex-1" id="b_bulan" readonly></div>
-                        <div class="flex"><label class="w-16">NAMA:</label><input type="text" class="glass-input flex-1 uppercase" id="b_nama" readonly></div>
-                        <div class="flex"><label class="w-24">BAHAGIAN:</label><input type="text" class="glass-input flex-1 uppercase" id="b_bahagian" readonly></div>
-                    </div>
-
-                    <div class="overflow-x-auto w-full border border-gray-500 rounded">
-                        <table class="wfb-table w-full whitespace-nowrap text-center">
-                            <thead>
-                                <tr>
-                                    <th rowspan="2">TARIKH</th>
-                                    <th colspan="2">PAGI</th>
-                                    <th colspan="2">PETANG</th>
-                                    <th rowspan="2">KENYATAAN /<br>MASA WFB (9G)</th>
-                                    <th rowspan="2">T/T</th>
-                                </tr>
-                                <tr>
-                                    <th>MASUK</th><th>KELUAR</th><th>MASUK</th><th>KELUAR</th>
-                                </tr>
-                            </thead>
-                            <tbody id="timesheetBodyB">
-                                <!-- Generated by JS for dates 16-31 -->
-                            </tbody>
-                        </table>
-                    </div>
-                    <button class="mt-4 realistic-btn w-full py-2 rounded text-white font-bold" onclick="app.simpanWFB(16, 31)"><i class="fa fa-save"></i> SIMPAN KAD 2 (B)</button>
-                </div>
-
+                <table class="w-full whitespace-nowrap text-xs">
+                    <thead><tr><th>Tarikh</th><th>M. MASUK</th><th>M. KELUAR</th><th>M. MASUK</th><th>M. KELUAR</th><th>Kenyataan</th><th>T/T</th></tr></thead>
+                    <tbody id="badanWFB2"></tbody>
+                </table>
             </div>
         </div>
+        <button onclick="simpanRekod()" class="btn-3d w-full mt-4 !bg-indigo-600 text-lg uppercase py-3 hover:bg-indigo-700 tracking-wider">☁️ Hantar ke Pengkalan Data LogWFB</button>
+    </div>
 
 
-        <!-- ============================== -->
-        <!-- TAB 2: BUKU LOG PERJALANAN KERETA -->
-        <!-- ============================== -->
-        <div id="vehicleLog" class="tab-content hidden">
-            <div class="glass p-4 rounded-xl">
-                <div class="border-b border-gray-400 pb-3 mb-4">
-                    <h2 class="text-xl font-bold uppercase tracking-wider text-pink-300 drop-shadow-md">BUKU LOG PERJALANAN KENDERAAN KERAJAAN</h2>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-                        <div><label class="text-sm font-bold">Bulan Rekod</label><input type="month" id="logBulan" class="glass-input w-full uppercase"></div>
-                        <div><label class="text-sm font-bold">No. Pendaf Kereta</label><input type="text" id="logPlat" class="glass-input w-full uppercase" placeholder="ABC 1234"></div>
-                        <div><label class="text-sm font-bold">Bahagian/Unit</label><input type="text" id="logUnit" class="glass-input w-full uppercase" placeholder="KASTAM I/HQ"></div>
-                        <div><label class="text-sm font-bold">Odo Permulaan (KM)</label><input type="number" id="baseOdo" class="glass-input w-full" placeholder="102554"></div>
-                    </div>
-                </div>
+    <!-- MAIN CONTENT BUKU LOG KENDERAAN -->
+    <div id="tabLogKereta" class="glass-bg p-4 mb-8 hidden fade-in">
+         <h2 class="text-xl font-bold luxury-text mb-4">BUKU REKOD PENGGUNAAN KENDERAAN & PERJALANAN</h2>
+         
+         <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4 bg-black bg-opacity-30 p-2 rounded">
+             <div><label class="text-[11px] text-gray-400">Bulan Rekod</label><input type="month" class="modern-input w-full mt-1"></div>
+             <div><label class="text-[11px] text-gray-400">No Kenderaan</label><input type="text" value="JAB 82" class="modern-input w-full mt-1 font-bold text-yellow-400 uppercase"></div>
+             <div><label class="text-[11px] text-gray-400">Odo Permulaan Kenderaan</label><input type="number" id="odoAwalUtama" value="150000" class="modern-input w-full mt-1"></div>
+             <div><label class="text-[11px] text-gray-400">Bahagian / Unit</label><input type="text" class="modern-input w-full mt-1"></div>
+         </div>
 
-                <!-- Input Entry Bar -->
-                <div class="bg-gray-800 bg-opacity-60 p-4 border border-blue-400 rounded-lg mb-4">
-                    <h3 class="text-emerald-400 font-bold mb-3">TAMBAH PERJALANAN (Auto Kira)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-2 text-sm text-black">
-                        <div class="col-span-1 lg:col-span-2">
-                            <label class="text-white text-xs font-semibold">Tarikh</label>
-                            <input type="date" id="entDate" class="w-full p-2 rounded">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-white text-xs font-semibold">Masa Pergi (12j)</label>
-                            <select id="entTimeGo" class="w-full p-2 rounded"></select>
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-white text-xs font-semibold">Masa Balik (12j)</label>
-                            <select id="entTimeBack" class="w-full p-2 rounded"></select>
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-white text-xs font-semibold">Odo Akhir (Blnc)</label>
-                            <input type="number" id="entOdoAkhir" class="w-full p-2 rounded" placeholder="102660">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="text-white text-xs font-semibold">Tujuan & Lokasi</label>
-                            <input type="text" id="entLokasi" class="w-full p-2 rounded uppercase" placeholder="Ke MAHKAMAH KL">
-                        </div>
-                        <div class="col-span-2">
-                            <label class="text-white text-xs font-semibold">Nama Pemandu</label>
-                            <input type="text" id="entPemandu" class="w-full p-2 rounded uppercase" placeholder="ZULKIFLI">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-white text-xs font-semibold">Kos Bahan (RM)</label>
-                            <input type="number" step="0.01" id="entKos" class="w-full p-2 rounded bg-yellow-100" placeholder="RM 50.00">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-white text-xs font-semibold">No Resit Minyak</label>
-                            <input type="text" id="entResit" class="w-full p-2 rounded" placeholder="R229982">
-                        </div>
-                        <div class="col-span-1">
-                            <label class="text-white text-xs font-semibold">Tindakan</label>
-                            <button onclick="app.tambahBukuLog()" class="realistic-btn w-full h-9 rounded text-white font-bold"><i class="fa fa-plus"></i> Add</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="log-table w-full whitespace-nowrap text-center text-sm border border-gray-600">
-                        <thead class="text-xs">
-                            <tr>
-                                <th>TARIKH</th><th>MASA (12h)</th><th>PEMANDU & PENGGUNA</th><th>TUJUAN & LOKASI</th>
-                                <th>ODO MULA</th><th>ODO AKHIR</th><th>JARAK (KM)</th><th>RESIT & RM</th><th>NOTA/LITER</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vehicleLogList">
-                            <!-- JS populated rows -->
-                        </tbody>
-                        <tfoot class="bg-gray-800 bg-opacity-80 border border-gray-400 font-bold text-yellow-300">
-                            <tr>
-                                <td colspan="6" class="text-right p-3">KESELURUHAN (JARAK & KOS BAHAN API): </td>
-                                <td id="totalKmVal" class="p-3 text-cyan-300 text-lg">0 KM</td>
-                                <td id="totalRmVal" class="p-3 text-pink-400 text-lg">RM 0.00</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-
+         <div class="overflow-x-auto custom-scroll mb-2 border border-gray-600 rounded bg-gray-900 bg-opacity-70 p-2">
+            <table id="tblLogBuku" class="text-[11px]">
+                <thead>
+                    <tr>
+                        <th rowspan="2">TARIKH</th>
+                        <th colspan="2">PILIH MASA</th>
+                        <th rowspan="2">PEMANDU</th>
+                        <th rowspan="2">TUJUAN & LOKASI PENUH</th>
+                        <th rowspan="2">PELULUS</th>
+                        <th rowspan="2">PENGGUNA</th>
+                        <th colspan="2">BACAAN (KM)</th>
+                        <th colspan="3">ISIAN BAKAR</th>
+                        <th rowspan="2">NOTA</th>
+                    </tr>
+                    <tr>
+                        <th class="!bg-blue-900 text-white">MASA PERGI</th><th class="!bg-blue-900 text-white">MASA BALIK</th>
+                        <th class="!bg-purple-900">ODO AKHIR</th><th class="!bg-purple-900 text-green-300">JARAK R(km)</th>
+                        <th class="!bg-red-900">RESIT/TNG No</th><th class="!bg-red-900">KOS (RM)</th><th class="!bg-red-900">LITER</th>
+                    </tr>
+                </thead>
+                <tbody id="badanLogKenderaan">
+                    <!-- Javascript Will Inject Rows Auto -->
+                </tbody>
+            </table>
+         </div>
+         <button class="btn-3d bg-slate-700 w-full mb-3 shadow-[0_0_10px_white] hover:bg-slate-600" onclick="tambahRowLog()">+ TAMBAH REKOD LOG BARU +</button>
+         
+         <div class="flex justify-end p-2">
+            <div class="bg-gray-800 px-4 py-2 border-l-4 border-yellow-500 rounded text-xl shadow-[0_0_8px_red]">
+                JUMLAH KOS MINYAK / TOL BULANAN: 
+                <span class="font-bold text-green-400 drop-shadow-md ml-2" id="jumlahTotalRM">RM 0.00</span>
             </div>
+         </div>
+    </div>
+
+
+    <!-- GALERI MUAT NAIK -->
+    <div id="tabUpload" class="glass-bg p-4 mb-8 hidden fade-in">
+        <h2 class="text-xl font-bold luxury-text mb-4">REKOD FIZIKAL BERGAMBAR (Cloud Supabase)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Box Resit -->
+            <div class="bg-black/50 border border-gray-600 rounded p-4 text-center group hover:border-yellow-400 transition-all">
+                <span class="text-4xl">🧾</span>
+                <h3 class="font-bold mt-2 text-red-300">UPLOAD RESIT MINYAK</h3>
+                <input type="file" accept="image/*" class="modern-input w-full my-3 text-xs" onchange="previewImej(this, 'pr1')">
+                <img id="pr1" class="hidden mx-auto h-20 mt-1 object-cover border p-1 rounded bg-white">
+                <button class="btn-3d btn-green w-full mt-3 py-1 text-xs" onclick="uploadFikir('Resit Minyak')">Upload Fail Minyak ☁</button>
+            </div>
+            <!-- Box TNG -->
+            <div class="bg-black/50 border border-gray-600 rounded p-4 text-center group hover:border-blue-400 transition-all">
+                 <span class="text-4xl">💳</span>
+                 <h3 class="font-bold mt-2 text-blue-300">UPLOAD TRANSAKSI TNG / TOL</h3>
+                 <input type="file" accept="image/*" class="modern-input w-full my-3 text-xs" onchange="previewImej(this, 'pr2')">
+                 <img id="pr2" class="hidden mx-auto h-20 mt-1 object-cover border p-1 rounded bg-white">
+                 <button class="btn-3d w-full mt-3 py-1 text-xs" onclick="uploadFikir('Resit TNG')">Upload Bukti TNG ☁</button>
+            </div>
+             <!-- Box Odo -->
+             <div class="bg-black/50 border border-gray-600 rounded p-4 text-center group hover:border-purple-400 transition-all">
+                <span class="text-4xl">⏱</span>
+                <h3 class="font-bold mt-2 text-purple-300">BUKTI BERGAMBAR ODOMETER</h3>
+                <input type="file" accept="image/*,video/mp4" class="modern-input w-full my-3 text-xs" onchange="previewImej(this, 'pr3')">
+                <img id="pr3" class="hidden mx-auto h-20 mt-1 object-cover border p-1 rounded bg-white">
+                <button class="btn-3d !bg-purple-700 border-purple-500 w-full mt-3 py-1 text-xs" onclick="uploadFikir('Odometer Meter')">Upload ODO Jarak ☁</button>
+           </div>
         </div>
 
-
-        <!-- ======================= -->
-        <!-- TAB 3: MUAT NAIK RESIT  -->
-        <!-- ======================= -->
-        <div id="uploadDocs" class="tab-content hidden">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Section Resit Minyak -->
-                <div class="glass p-6 rounded-xl flex flex-col items-center">
-                    <div class="bg-gradient-to-r from-yellow-600 to-red-600 p-4 rounded-full shadow-lg mb-4 mt-2">
-                        <i class="fa-solid fa-gas-pump text-4xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-bold uppercase mb-4 drop-shadow text-amber-200">Muat Naik Resit Minyak</h3>
-                    <input type="file" id="fileMinyak" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100 mb-4" />
-                    <button onclick="app.uploadFile('minyak', 'fileMinyak')" class="realistic-btn w-full py-2 rounded text-white font-bold"><i class="fa fa-cloud-upload"></i> MUAT NAIK (STORAGE)</button>
-                </div>
-                
-                <!-- Section TNG -->
-                <div class="glass p-6 rounded-xl flex flex-col items-center">
-                    <div class="bg-gradient-to-r from-blue-600 to-indigo-800 p-4 rounded-full shadow-lg mb-4 mt-2">
-                        <i class="fa-solid fa-id-card text-4xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-bold uppercase mb-4 drop-shadow text-blue-200">Muat Naik TNG / Tol</h3>
-                    <input type="file" id="fileTNG" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4" />
-                    <button onclick="app.uploadFile('tng', 'fileTNG')" class="realistic-btn w-full py-2 rounded text-white font-bold"><i class="fa fa-cloud-upload"></i> MUAT NAIK (STORAGE)</button>
-                </div>
-
-                <!-- Section Odo Gambar -->
-                <div class="glass p-6 rounded-xl flex flex-col items-center">
-                    <div class="bg-gradient-to-r from-teal-600 to-emerald-800 p-4 rounded-full shadow-lg mb-4 mt-2">
-                        <i class="fa-solid fa-dashboard text-4xl text-white"></i>
-                    </div>
-                    <h3 class="text-xl font-bold uppercase mb-4 drop-shadow text-emerald-200">Gambar Odometer Mula/Akhir</h3>
-                    <input type="file" id="fileOdo" class="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 mb-4" />
-                    <button onclick="app.uploadFile('odo', 'fileOdo')" class="realistic-btn w-full py-2 rounded text-white font-bold"><i class="fa fa-cloud-upload"></i> MUAT NAIK (STORAGE)</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ======================= -->
-        <!-- TAB 4: VIEWER / HISTORY -->
-        <!-- ======================= -->
-        <div id="dataViewer" class="tab-content hidden">
-            <div class="glass p-4 rounded-xl">
-                <div class="flex justify-between items-center mb-4 border-b border-white border-opacity-20 pb-4">
-                    <h2 class="text-xl font-bold uppercase text-purple-300"><i class="fa-solid fa-server mr-2"></i> Pengkalan Data Log Cloud</h2>
-                    <button onclick="app.refreshViewer()" class="realistic-btn py-1 px-4 text-sm font-bold rounded shadow"><i class="fa fa-refresh mr-1"></i> SEMAK CLOUD DATA</button>
-                </div>
-
-                <!-- Imej yg Diupload Grid -->
-                <div class="mt-4">
-                    <h3 class="font-bold text-gray-200 mb-2">GALERI FIZIKAL (GAMBAR UPLOAD)</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 border border-white border-opacity-10 p-4 bg-black bg-opacity-20 rounded" id="galleryStorage">
-                        <!-- Generated Data -->
-                        <div class="text-xs text-gray-400 col-span-full">Tekan SEMAK CLOUD DATA untuk melihat senarai muat naik / tiada data setakat ini...</div>
-                    </div>
-                </div>
-
-                <div class="mt-6 p-4 border border-cyan-500 border-opacity-50 bg-cyan-900 bg-opacity-20 rounded-lg">
-                    <h3 class="font-bold text-gray-200 mb-2">RAW DATABASE SCRIPT (DATA LOG JSON View)</h3>
-                    <pre class="text-xs text-cyan-200 overflow-x-auto h-40 scrollbar-hide" id="cloudJSONBox">[{ "status" : "Menunggu Sync Supabase", "row" : 0 }]</pre>
-                </div>
-
-            </div>
+        <hr class="border-gray-700 my-6">
+        
+        <h3 class="text-yellow-500 font-bold tracking-wider mb-2">📁 ASET YANG TELAH DI-UPLOAD:</h3>
+        <div id="galeriUploaded" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 bg-gray-800 p-2 rounded min-h-[100px] shadow-inner items-center">
+             <span class="col-span-full text-center text-gray-500 text-xs py-5">Tiada imej baru direkod dari Cloud Supabase hari ini...</span>
         </div>
     </div>
 
 
-<!-- ============================== -->
-<!-- JAVA SCRIPT MAIN LOGIC CORE    -->
-<!-- ============================== -->
-<script>
-    /* ----- REALTIME CLOCK & AUTO-HIDE PROFILE ----- */
-    const updateTime = () => {
-        const t = new Date();
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true };
-        const myTimeStr = new Intl.DateTimeFormat('ms-MY', options).format(t).toUpperCase();
-        document.getElementById('realtimeClock').innerText = myTimeStr;
-    }
-    setInterval(updateTime, 1000); updateTime();
+    <!-- PUSAT SKRIP LOGIC DAN CLOUD/JS (No framework needed except browser capabilities) -->
+    <script>
+        /* =======================================================
+         SETUP URL / SUPABASE SETTING TERAS SINI: 
+         User Mesti Update Supabase Info Selepas Daftat DB Baru. 
+        ======================================================== */
+        const SUPA_URL = 'https://zkomhgzlcfjzhijhptec.supabase.co'; 
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inprb21oZ3psY2ZqemhpamhwdGVjIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NzQ1OTcxNCwiZXhwIjoyMDkzMDM1NzE0fQ.qzrN270XWh_qRC_4_Zk9tohiQwbHC34GrLKuhe3W95E'; 
 
-    let profileTimeout;
-    window.addEventListener('mousemove', () => {
-        const pf = document.getElementById('profileSection');
-        pf.style.opacity = '1';
-        clearTimeout(profileTimeout);
-        profileTimeout = setTimeout(() => { pf.style.opacity = '0.3'; }, 8000);
-    });
+        // Let supabase; // akan enable bila key telah di set
+        // function initDB() { supabase = supabase.createClient(SUPA_URL, SUPA_KEY); }
 
-    /* ----- GENERATE OPTIONS UTK TIME 12 HRS PERGI BALIK ----- */
-    function gen12hOptions(selId) {
-        let htm = '<option value="">Jam...</option>';
-        for (let i=1; i<=24; i++) {
-            for(let min of ['00', '15', '30', '45']) {
-                let hour12 = i%12 === 0 ? 12 : i%12;
-                let ampm = i < 12 || i === 24 ? "PG" : "PTG";
-                if(i===24) hour12=12; ampm="PG"; 
-                // fix standard AM PM checks logic slightly relaxed for UX mapping
-                let dsp = `${hour12}:${min} ${ampm}`;
-                htm += `<option value="${dsp}">${dsp}</option>`;
-                if(i===24 && min==="00") break; // done
-            }
-        }
-        document.getElementById(selId).innerHTML = htm;
-    }
-    gen12hOptions('entTimeGo'); gen12hOptions('entTimeBack');
-
-    /* ----- DATABASE SUPABASE INITS (CONFIG HERE VIA JS) ----- */
-    const supaConfig = {
-        //[ SILA GANTIKAN URL & ANON KEY DI BAWAH APABILA SELESAI SETUP (RUJUK NOTA MD) ]
-        url: "https://zkomhgzlcfjzhijhptec.supabase.co",
-        key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inprb21oZ3psY2ZqemhpamhwdGVjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc0NTk3MTQsImV4cCI6MjA5MzAzNTcxNH0.p51eTeql9tiHXYIaGuxh0DuDET9F_R7F5j2eG-99QBk"
-    };
-    let supabase = null; 
-    let activeUser = null;
-    
-    // Safety check setup supabase API mock to avoid errors locally if not replaced
-    try {
-        if(supaConfig.url !== "https://your-project-id.supabase.co") {
-             supabase = window.supabase.createClient(supaConfig.url, supaConfig.key);
-        } else {
-             console.warn("Sila konfigurasikan key Supabase untuk bind pengkalan data Cloud");
-        }
-    } catch (e) { console.error("Error creating SB", e); }
-
-    /* AUTH LOGIN SYSTEM (Supabase x Google Oauth) */
-    const auth = {
-        async login() {
-            if(!supabase) return alert("PENTING: \n1) Skrol bawah HTML rujuk arahan Supabase. \n2) Sila masukkan keys URL dan KEY pada blok konfigurasi Javascript index.html.\n\nSistem diuji & berfungsi penuh secara maya ketika ini.");
-            try {
-                const { data, error } = await supabase.auth.signInWithOAuth({ provider: 'google', options:{ queryParams: { prompt: 'consent' }} });
-                if (error) throw error;
-            } catch(e) { alert("Error Auth Google: " + e.message); }
-        },
-        async logout() {
-            if(!supabase) return;
-            await supabase.auth.signOut(); window.location.reload();
-        },
-        async checkSess() {
-            if(!supabase) return;
-            const { data } = await supabase.auth.getSession();
-            if(data?.session) {
-                activeUser = data.session.user;
-                document.getElementById('btnLogout').classList.remove('hidden');
-                document.getElementById('userInfo').classList.remove('hidden');
-                document.getElementById('userInfo').innerText = `ID: ${activeUser.email}`;
-            }
-        }
-    }
-    auth.checkSess();
-
-    /* ----- UTILITIES LOGIK & PENGIRAAN ----- */
-    const app = {
-        wfbLogsA:[], wfbLogsB: [], vehicleLogsLocal: [], uploadsGallery:[],
-        baseStartOdo: 0, sumKM: 0, sumRM: 0.00,
+        // --- SISTEM ASAS WEB -- //
         
-        showTab(tid) {
-            document.querySelectorAll('.tab-content').forEach(e => e.classList.add('hidden'));
-            document.getElementById(tid).classList.remove('hidden');
-        },
+        // Masa dan Hari Waktu Malaysia Realtime (Format 12Jam dengan teks B.Melayu)
+        function jalankanJamRealtime() {
+            setInterval(() => {
+                const sekarang = new Date();
+                let j = sekarang.getHours(), m = sekarang.getMinutes(), d = sekarang.getSeconds();
+                let hariIdx = sekarang.getDay();
+                let namaHari =["AHAD", "ISNIN", "SELASA", "RABU", "KHAMIS", "JUMAAT", "SABTU"];
+                let txtHari = namaHari[hariIdx];
 
-        // Sinkronise Head Info
-        syncFields() {
-            document.getElementById('b_no').value = document.getElementById('a_no').value;
-            document.getElementById('b_bulan').value = document.getElementById('wfb_bulan').value;
-            document.getElementById('b_nama').value = document.getElementById('wfb_nama').value;
-            document.getElementById('b_bahagian').value = document.getElementById('wfb_bahagian').value;
-        },
+                let ap = "PG"; 
+                if (j >= 12) { ap = "PTG"; if (j >= 20) { ap = "MLM"; } }
+                if (j > 12) j -= 12; if (j === 0) j = 12;
 
-        /* -------------- WFB CALCULATION LOGIC -------------- */
-        renderTimesheet() {
-            const hA = document.getElementById('timesheetBodyA');
-            const hB = document.getElementById('timesheetBodyB');
-            let h1='', h2='';
+                document.getElementById('realtime-clock').innerText = 
+                    `${txtHari} | ${String(j).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(d).padStart(2,'0')} ${ap}`;
+            }, 1000);
+        }
+        jalankanJamRealtime();
 
-            const m2r = (idPrefix, mName, kName) => {
-                 return `
-                    <input type="time" class="glass-input p-1 text-xs w-full mb-1 t_chk_${idPrefix}_${mName}" onchange="app.checkWfbOt('${idPrefix}', '${mName}')" />
-                 `;
-            };
-
-            // Days 1 - 15 (Page 1)
-            for(let i=1; i<=15; i++) {
-                h1 += `<tr><td class="font-bold">${i}</td>
-                    <td><input type="time" id="m1_${i}" onchange="app.checkWfbOt('${i}', 'm1')" class="glass-input p-1 w-20 text-xs wfb_m" /></td>
-                    <td><input type="time" id="k1_${i}" onchange="app.checkWfbOt('${i}', 'k1')" class="glass-input p-1 w-20 text-xs wfb_k" /></td>
-                    <td><input type="time" id="m2_${i}" class="glass-input p-1 w-20 text-xs" /></td>
-                    <td><input type="time" id="k2_${i}" class="glass-input p-1 w-20 text-xs" /></td>
-                    <td><input type="text" id="n_${i}" class="glass-input p-1 w-32 text-xs" placeholder="-" /></td>
-                    <td><input type="text" id="s_${i}" class="glass-input p-1 w-12 text-xs uppercase" placeholder="T/T" /></td>
-                </tr>`;
-            }
-            
-            // Days 16 - 31 (Page 2)
-            for(let i=16; i<=31; i++) {
-                h2 += `<tr><td class="font-bold">${i}</td>
-                    <td><input type="time" id="m1_${i}" onchange="app.checkWfbOt('${i}', 'm1')" class="glass-input p-1 w-20 text-xs wfb_m" /></td>
-                    <td><input type="time" id="k1_${i}" onchange="app.checkWfbOt('${i}', 'k1')" class="glass-input p-1 w-20 text-xs wfb_k" /></td>
-                    <td><input type="time" id="m2_${i}" class="glass-input p-1 w-20 text-xs" /></td>
-                    <td><input type="time" id="k2_${i}" class="glass-input p-1 w-20 text-xs" /></td>
-                    <td><input type="text" id="n_${i}" class="glass-input p-1 w-32 text-xs" placeholder="-" /></td>
-                    <td><input type="text" id="s_${i}" class="glass-input p-1 w-12 text-xs uppercase" placeholder="T/T" /></td>
-                </tr>`;
-            }
-
-            hA.innerHTML = h1; hB.innerHTML = h2;
-        },
-
-        checkWfbOt(d, idName) {
-            // Rules Gov WFB: core WFB -> 7.30 - 4.30. Range extended max WFB limit is 09.00 -> 18.00
-            let inputField = document.getElementById(`${idName}_${d}`);
-            let in_1 = document.getElementById(`m1_${d}`);
-            let out_1 = document.getElementById(`k1_${d}`);
-            let noteF = document.getElementById(`n_${d}`);
-            
-            if(!inputField.value) return;
-
-            let hm = inputField.value.split(":");
-            let hour = parseInt(hm[0], 10);
-            let min = parseInt(hm[1], 10);
-
-            // Clears logic tags manually initially
-            inputField.classList.remove("time-red", "time-ot");
-
-            if (idName === 'm1') {
-                // If punch IN > 09:00 = Red Alert text!
-                if(hour > 9 || (hour === 9 && min > 0)) {
-                    inputField.classList.add("time-red"); 
-                    if(noteF.value=="") noteF.value = "Kelewatan/WFB Over limit";
-                } 
-                // IF punch IN < 07:00 (specifically early starts for OT processing limit check)
-                else if (hour < 7) {
-                    inputField.classList.add("time-ot");
-                }
-            }
-            if (idName === 'k1') {
-                if(!in_1.value) return; 
-                let mHm = in_1.value.split(":"); 
-                let entryHour = parseInt(mHm[0]);
-                // Out Time max bounds Govt > 18.00 indicates definite formal Overtime flag. Or Exceeds full span.
-                if(hour >= 18 && min > 0) { 
-                   out_1.classList.add("time-ot");
-                   noteF.value += (noteF.value==""?"":"; ") + "Rekod OT PTG >18.00";
-                }
-            }
-        },
-
-        async simpanWFB(startIdx, endIdx) {
-            alert(`Mensimulasikan penyimpanan Rekod Hari: ${startIdx}-${endIdx}. \nUntuk operasi sebenar (Production), sila hidupkan Setup Supabase Keys! \nDisimpan sementara dlm memori (LocalStorage maya).`);
-            let wfbA_data =[];
-            for(let i=startIdx; i<=endIdx; i++) {
-                if(document.getElementById(`m1_${i}`)?.value) {
-                     wfbA_data.push({ hari: i, m1: document.getElementById(`m1_${i}`).value, n: document.getElementById(`n_${i}`).value });
-                }
-            }
-            console.log(wfbA_data);
-            document.getElementById('cloudJSONBox').innerText = JSON.stringify(wfbA_data, null, 2);
-            document.getElementById('cloudJSONBox').classList.add("text-emerald-300");
-        },
-
-
-        /* -------------- LOG PERJALANAN / CAR KKM CALCS -------------- */
-        tambahBukuLog() {
-             const boVal = parseInt(document.getElementById('baseOdo').value || 0);
-             app.baseStartOdo = (app.baseStartOdo == 0) ? boVal : app.baseStartOdo;
-             
-             let pDt = document.getElementById('entDate').value;
-             let mGo = document.getElementById('entTimeGo').value;
-             let mBk = document.getElementById('entTimeBack').value;
-             let loA = parseInt(document.getElementById('entOdoAkhir').value || 0);
-             let luk = document.getElementById('entLokasi').value;
-             let uPem = document.getElementById('entPemandu').value;
-             let nKs = parseFloat(document.getElementById('entKos').value || 0).toFixed(2);
-             let reS = document.getElementById('entResit').value;
-
-             if(!pDt || !mGo || loA <= 0 || !luk) { alert("Pastikan isi Tarikh, Masa, Destinasi dan Odometer Akhir dgn Sah."); return; }
-             
-             // Kira
-             let jkm = (loA - app.baseStartOdo);
-             if (jkm < 0) { alert("Ralat: Odo Akhir lebih kecil dari Odo awal."); return;}
-
-             // update trackers state memory
-             let l_obj = { tarikh: pDt, tg: mGo, tb: mBk, m_end: loA, jrk: jkm, m_sta: app.baseStartOdo, loc: luk, dvr: uPem, rm: parseFloat(nKs), rsn: reS};
-             app.vehicleLogsLocal.push(l_obj);
-
-             app.baseStartOdo = loA; // latest base starts pointing forward logically
-
-             app.renderLogTables();
-
-             // Auto Clean some inputs form (Quality UX logic)
-             document.getElementById('entOdoAkhir').value=''; document.getElementById('entKos').value=''; document.getElementById('entLokasi').value='';
-             document.getElementById('baseOdo').value = app.baseStartOdo;
-        },
-
-        renderLogTables() {
-            const tkTbl = document.getElementById('vehicleLogList');
-            let rwHtml = ''; app.sumKM = 0; app.sumRM = 0;
-
-            app.vehicleLogsLocal.forEach((vk, ix) => {
-                 app.sumKM += parseInt(vk.jrk);
-                 app.sumRM += parseFloat(vk.rm);
-
-                 rwHtml += `<tr class="border-b border-gray-600 hover:bg-gray-800 text-cyan-50">
-                    <td class="p-1">${vk.tarikh}</td>
-                    <td class="p-1">D:${vk.tg} / T:${vk.tb||'-'}</td>
-                    <td class="p-1 uppercase">${vk.dvr}</td>
-                    <td class="p-1 uppercase">${vk.loc}</td>
-                    <td class="p-1 font-mono text-xs">${vk.m_sta}</td>
-                    <td class="p-1 font-mono text-xs text-yellow-300 font-bold">${vk.m_end}</td>
-                    <td class="p-1 font-bold text-green-300">${vk.jrk}</td>
-                    <td class="p-1"><span class="block text-[10px] text-pink-300">R: ${vk.rsn||'Tiada'}</span>RM ${vk.rm.toFixed(2)}</td>
-                    <td class="p-1 text-center"><i class="fa fa-info-circle text-gray-500 cursor-pointer" onclick="alert('Raw Data Index ${ix}')"></i></td>
-                 </tr>`;
-            });
-            tkTbl.innerHTML = rwHtml;
-            document.getElementById('totalKmVal').innerText = app.sumKM + " KM";
-            document.getElementById('totalRmVal').innerText = "RM " + app.sumRM.toFixed(2);
-            document.getElementById('cloudJSONBox').innerText = JSON.stringify(app.vehicleLogsLocal, null, 2);
-        },
-
-        /* -------------- FILE / IMAGE MUAT NAIK CLOUD -------------- */
-        async uploadFile(bucketType, elemid) {
-             const eT = document.getElementById(elemid);
-             if(!eT.files.length) return alert('Pilih Fail sebelum memuat naik.');
-             const d_file = eT.files[0];
-             alert(`Aplikasi dalam mode Offline DB test! Gambar [${d_file.name}] sebagai mock uploaded secara lokal cache. Konfig keys SUPABASE pd js script file jika nak test Storage.`);
-             
-             // Offline mocking UI build out
-             app.uploadsGallery.push({ url: URL.createObjectURL(d_file), id: Date.now() + Math.random(), nm: d_file.name, tb: bucketType });
-             app.refreshViewer(); 
-
-             eT.value = ""; 
-        },
-
-        refreshViewer() {
-             const tGallery = document.getElementById('galleryStorage');
-             if(app.uploadsGallery.length === 0) { return; }
-
-             let imgMap = '';
-             app.uploadsGallery.forEach(gi => {
-                  let tpBadge = gi.tb === 'minyak' ? 'MINYAK/GAS' : (gi.tb === 'tng' ? 'KAD TOL (TNG)' : 'GAMBAR ODOMETER');
-                  imgMap += `
-                  <div class="glass relative p-2 flex flex-col items-center justify-center rounded">
-                        <span class="absolute top-1 right-1 bg-black rounded text-[9px] px-1 font-bold uppercase text-white bg-opacity-75 z-10 border border-white">${tpBadge}</span>
-                        <img src="${gi.url}" alt="${gi.nm}" class="w-full h-24 object-cover hover:scale-105 transition-transform filter rounded border border-gray-400 opacity-90 shadow-lg mt-3 cursor-pointer" onclick="window.open('${gi.url}', '_blank')">
-                        <div class="mt-2 text-[10px] truncate w-full text-center text-cyan-200" title="${gi.nm}">${gi.nm}</div>
-                  </div>
-                  `;
-             });
-             tGallery.innerHTML = imgMap;
+        // System Switcher Tabs UI Responsive Functionality
+        function bukaTab(tabID) {
+            ['tabWFB', 'tabLogKereta', 'tabUpload'].forEach(id => { document.getElementById(id).style.display = 'none'; });
+            document.getElementById(tabID).style.display = 'block';
+            if (tabID === 'tabWFB') binaKad(); // Force UI repaint time grid table 
         }
 
-    }
+        // ====== FUNGSI SISTEM 1: KAD MENCATAT WAKTU (WFB RULE WAKTU PEKERJA) =======
 
-    // ON INJECT INITIALISER //
-    app.renderTimesheet();
-</script>
+        document.addEventListener("DOMContentLoaded", () => {
+             // Letak default bulan hari ni utk input month (eg: 2026-04)
+             const td = new Date(); 
+             const bm = `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}`;
+             if(document.getElementById('bulantab')) document.getElementById('bulantab').value = bm;
+             binaKad(); 
+             tambahRowLog(); // tambah at least 1 raw kenderaan first load.
+        });
+
+        function sinkronSiriNo(val){
+             document.getElementById('bno_display').innerText = val;
+        }
+
+        // Logic check OT/MERAH MASA WFB 
+        // Range Normal = 7:30 PG to 6:00 PTG (maximum 9am to 6pm WFB). Over 9AM in, Highlight Red.  Less than 7:00 AM (Early), or Exceed 6pm -> OT Flags. Input in type='time' receives military eg "08:15"
+        function padMasaCekWarna(elm, isMasaMasuk) {
+            let mValue = elm.value;
+            elm.className = "modern-input w-[105px]"; // reset classes
+            if(!mValue) return;
+
+            const split_time = mValue.split(":");
+            let hh = parseInt(split_time[0]); let mm = parseInt(split_time[1]);
+
+            if (isMasaMasuk) {
+                // Rule Merah WFB gov jika lewat Masuk lebih 9.00AM
+                if (hh > 9 || (hh === 9 && mm > 0)) { elm.classList.add('red-flag'); }
+                // Jika masuk terawal (e.g <= 6:59 AM) di highlight Biru OT / Extra 
+                else if (hh < 7) { elm.classList.add('ot-flag'); }
+                
+            } else { // Jika Check masa keluar (balik)
+                 // Jika lebih atau jam 18:01+ (melebihi standard flexy/WFB normal pulang, dia tanda Biru (OT claimable base marking))
+                 if(hh > 18 || (hh === 18 && mm > 0)) { elm.classList.add('ot-flag'); }
+                 // Atau Jika Keluar TAPI Masa bawah WFB minimim rule eg 16.30, dia lari keluar Red alert
+                 else if (hh < 16 || (hh === 16 && mm < 30)) { elm.classList.add('red-flag'); }
+            }
+        }
+
+        function rekaanTrTableDateRow(dateFullFormat, tarikhPendekNomborDayStr) {
+             let selectNoteHtml = `<select class="modern-input w-24"><option>-</option><option>WFB(M.F)</option><option>MC</option><option>CUTI CR</option><option>EL</option></select>`;
+             // return html literal raw (input class binding event for instant logic processing time colour). Format diletak Input-TypeTime disokong Mobile(Ios, Android picker 365 format default mobile pad). Add Options
+             return `<tr>
+                 <td class="font-bold text-gray-300 w-24"> ${tarikhPendekNomborDayStr}</td>
+                 <td><input type="time" class="modern-input w-[105px]" onchange="padMasaCekWarna(this, true)"/></td>
+                 <td><input type="time" class="modern-input w-[105px]" onchange="padMasaCekWarna(this, false)"/></td>
+                 <td><input type="time" class="modern-input w-[105px]" onchange="padMasaCekWarna(this, true)"/></td>
+                 <td><input type="time" class="modern-input w-[105px]" onchange="padMasaCekWarna(this, false)"/></td>
+                 <td><input type="text" placeholder="..." list="catatanList" class="modern-input w-36"></td>
+                 <td class="text-xs text-blue-300/40 w-20 pointer border-none cursor-pointer p-0" onclick="alert('Digital Sign Captured by auth account!')">🔏 Tandatangan</td>
+             </tr>`;
+        }
+
+        function binaKad() {
+            let tblBody1 = document.getElementById('badanWFB1'); tblBody1.innerHTML = '';
+            let tblBody2 = document.getElementById('badanWFB2'); tblBody2.innerHTML = '';
+
+            let targetM = document.getElementById('bulantab').value;
+            if(!targetM) return;
+            let parts = targetM.split("-"); let tTahun = parts[0], tBulan = parts[1]-1; 
+            
+            // Generate Total day 
+            let jHariInM = new Date(tTahun, (tBulan+1), 0).getDate(); 
+            
+            for(let hr=1; hr<=jHariInM; hr++) {
+                 // Check Day text eg "Sab, Aha..." (Short BM localized) 
+                 let drM = new Date(tTahun, tBulan, hr); 
+                 let nmHsrt =["Ah","Is","Sl","Rb","Kh","Jm","Sb"][drM.getDay()]; 
+
+                 // Display logic e.g -> "01 Kh"  -> short and fit phone screen side grid  
+                 let tdHTML = rekaanTrTableDateRow(drM, `${String(hr).padStart(2,'0')} / ${nmHsrt}`);
+
+                 // Muka Satu Limit : 1 Hingga 15 a/c to prompt constraints
+                 if (hr <= 15) { tblBody1.insertAdjacentHTML('beforeend', tdHTML); } 
+                 // Muka Dua Range (Muka kebelakang diletak tepi html via div res): Bil. 16 Hingga 31 Mengikut Bulan Reatimé
+                 else { tblBody2.insertAdjacentHTML('beforeend', tdHTML); } 
+            }
+            
+            // Letak auto generate template Datalist option in the html stream once untuk note section column  Kenyataan input field autocomplete suggestion feature ! (User req + note+options choices added inside input DOM connection element without long js.)
+            if(!document.getElementById('catatanList')){
+                 let cListHtml = `<datalist id="catatanList"><option value="Waktu Fleksibel Penuh"><option value="Meeting / L.Kawasan"><option value="O.T Selesai Duty"><option value="Lulusan Boss A"></datalist>`;
+                 document.body.insertAdjacentHTML('beforeend',cListHtml);
+            }
+        }
+        
+
+        // ====== FUNGSI SISTEM 2: AUTO KALKULASI & BORANG KENDERAAN NEGARA ======
+        // Function input chaining Logic -> row[x].jarak_calc(akhir-start); Then push sum calculation RM kos resit total amount at Footer view real time.
+        function padAutoOdoCalculaterTableLogicUpdateData() {
+            const rowDOMCollectionLogsArrObjHTMLTableNodeReferenceDOM  = document.querySelectorAll("#tblLogBuku tbody tr");
+            
+            let previousKiriUtamaAwalSatuValue = parseFloat(document.getElementById('odoAwalUtama').value) || 0;
+            let totCost = 0.00;
+
+            rowDOMCollectionLogsArrObjHTMLTableNodeReferenceDOM.forEach((trx) => {
+                 let OdoFieldKananDalamBarisanNowHTMLTargetDOMInxDomElRefNodeElTextQueryInputReferenceBoxOdoHTMLTextDOMDomIDStrBoxObj = trx.querySelector('.odo-akhir');
+                 let TextKiraanResult = trx.querySelector('.res-jarak');
+                 
+                 let valueKananDalamBarisItuDalamNumbTypeData = parseFloat(OdoFieldKananDalamBarisanNowHTMLTargetDOMInxDomElRefNodeElTextQueryInputReferenceBoxOdoHTMLTextDOMDomIDStrBoxObj.value);
+                 if (isNaN(valueKananDalamBarisItuDalamNumbTypeData) || valueKananDalamBarisItuDalamNumbTypeData <= 0) { 
+                      TextKiraanResult.value = "-";
+                 } else {
+                     // Magic Logic 
+                     let distance = valueKananDalamBarisItuDalamNumbTypeData - previousKiriUtamaAwalSatuValue;
+                     TextKiraanResult.value = distance; 
+                     // Pindah Previous kpd bacaan baru untuk barisan baru / chain row list flow log record state machine concept value mapping!
+                     previousKiriUtamaAwalSatuValue = valueKananDalamBarisItuDalamNumbTypeData; 
+                 }
+                 
+                 let priceRmDuidTulisStringValToValTextHTMLTypeFormatingConvertNumbaDomFieldInPutReference = parseFloat(trx.querySelector('.kos-resit-money-money-ringgit-tiga-belas-dua').value);
+                 if(!isNaN(priceRmDuidTulisStringValToValTextHTMLTypeFormatingConvertNumbaDomFieldInPutReference)) { totCost += priceRmDuidTulisStringValToValTextHTMLTypeFormatingConvertNumbaDomFieldInPutReference; }
+            });
+            document.getElementById('jumlahTotalRM').innerText = "RM " + totCost.toFixed(2);
+        }
+
+        // Custom template selection time with PG PTG dropdow inside Log format constraints table: Format options. Time and period are manual type 12Hrs. 
+        function templateLogRowTeksPanjangMenegak(){ 
+           return `
+             <tr>
+                 <td><input type="date" class="modern-input w-[105px]"></td>
+                 <td><div class="flex items-center gap-1 bg-white/10 p-[1px]"><input type="number" min="1" max="12" placeholder="Jm:Mn" class="modern-input !w-[45px] text-xs h-[25px] !p-1 text-center"><select class="text-black text-xs font-bold w-12 rounded cursor-pointer p-[1px] shadow-sm m-0 border h-[24px] outline-none hover:bg-slate-300 ring-2 ring-indigo-500 hover:ring-opacity-40 hover:opacity-100 hover:brightness-105 active:scale-[0.96] shadow"><option value="PG">PG 🌅</option><option value="PTG">PTG 🏙️</option><option value="MLM">MLM 🌌</option></select></div></td>
+                 <td><div class="flex items-center gap-1 bg-white/10 p-[1px]"><input type="number" min="1" max="12" placeholder="Jm:Mn" class="modern-input !w-[45px] text-xs h-[25px] !p-1 text-center"><select class="text-black text-xs font-bold w-12 rounded cursor-pointer p-[1px] shadow-sm m-0 border h-[24px] outline-none hover:bg-slate-300 ring-2 ring-indigo-500 hover:ring-opacity-40 hover:opacity-100 hover:brightness-105 active:scale-[0.96] shadow"><option value="PG">PG 🌅</option><option value="PTG">PTG 🏙️</option><option value="MLM">MLM 🌌</option></select></div></td>
+                 <td><input type="text" class="modern-input w-24 uppercase" placeholder="PEMANDU..."></td>
+                 <td><textarea class="modern-input w-40 min-h-[40px] p-1 custom-scroll" placeholder="Sertakan Lokasi..."></textarea></td>
+                 <td><input type="text" class="modern-input w-20"></td>
+                 <td><input type="text" class="modern-input w-20"></td>
+                 
+                 <!-- Bahagian Kritikal auto kira odo chaining system -> ikat fn onchange calculation!  -->
+                 <td><input type="number" class="modern-input odo-akhir w-[90px] font-bold text-center !bg-blue-900/40 text-yellow-300 placeholder-white" oninput="padAutoOdoCalculaterTableLogicUpdateData()" placeholder="Baca Akhir"/></td>
+                 <td><input type="text" disabled class="modern-input res-jarak w-12 text-center font-bold" value="0"/></td>
+                 
+                 <!-- RM Total function chainer listener -->
+                 <td><input type="text" class="modern-input w-[95px] tracking-tight uppercase" placeholder="# Resit / TnG"></td>
+                 <td><div class="flex relative"><span class="absolute left-1 mt-1 text-xs text-red-500 font-bold">$</span><input type="number" class="modern-input kos-resit-money-money-ringgit-tiga-belas-dua w-[60px] pl-[15px]" value="" oninput="padAutoOdoCalculaterTableLogicUpdateData()"/></div></td>
+                 <td><input type="number" class="modern-input w-12" placeholder="Lt.."></td>
+                 
+                 <td><input type="text" class="modern-input w-20">
+                    <button class="bg-red-800 p-1 text-xs border rounded ml-1 mt-1 text-red-200" onclick="this.closest('tr').remove();padAutoOdoCalculaterTableLogicUpdateData()"> X Padam </button>
+                 </td>
+             </tr>`;
+        }
+
+        function tambahRowLog(){ 
+            document.getElementById('badanLogKenderaan').insertAdjacentHTML('beforeend', templateLogRowTeksPanjangMenegak());
+            padAutoOdoCalculaterTableLogicUpdateData(); // refresh in case it resets values display string view layout flow tree css object nodes 
+        }
+
+        // Listener bila awal berubah
+        document.getElementById('odoAwalUtama').addEventListener('input', () => { padAutoOdoCalculaterTableLogicUpdateData() });
+
+
+        // ======== FUNGSI 3 UPLOAD CLOUD ======= //
+        // 1. Simpan gambaran cache base 64 browser dan preview img object model html css UI render flow 
+        function previewImej(input_node, view_t_DOM_NodeIDStrBoxModelValueIDProprietryImageTagTargetClassPropertyTagAttributeDOMTreeElementModelDOMRef_Box_ImageFramePreviewerDOMBoxIDDOMWindowTargetBox_DOMIdVarValIdDOMHTMLViewTreeTDomIDHtmlNodeIdImageImageObjHtmlViewTageHTMLElementObjectReferenceInWindowGlobalTargetViewProprietorFrameD) {
+            const fil = input_node.files[0];
+            if(fil){
+                 let rvReadrrXBrowserBltB1ValWindowNavFileLoadReadObjectBinaryMemoryBlobArrayTypeX_ViewTypeValStringValueBinaryRawDadaViewResultDataStreamTypeRenderViewBrowserMemDomValHtmlDomFileSrcVarFileSrcReferenceTypeBltRef=new FileReader(); 
+                 rvReadrrXBrowserBltB1ValWindowNavFileLoadReadObjectBinaryMemoryBlobArrayTypeX_ViewTypeValStringValueBinaryRawDadaViewResultDataStreamTypeRenderViewBrowserMemDomValHtmlDomFileSrcVarFileSrcReferenceTypeBltRef.onload=(eknObjectClickTriggerActionViewWindowDataEventSourceEvtDOM) => { 
+                      const gbr = document.getElementById(view_t_DOM_NodeIDStrBoxModelValueIDProprietryImageTagTargetClassPropertyTagAttributeDOMTreeElementModelDOMRef_Box_ImageFramePreviewerDOMBoxIDDOMWindowTargetBox_DOMIdVarValIdDOMHTMLViewTreeTDomIDHtmlNodeIdImageImageObjHtmlViewTageHTMLElementObjectReferenceInWindowGlobalTargetViewProprietorFrameD); 
+                      gbr.src= eknObjectClickTriggerActionViewWindowDataEventSourceEvtDOM.target.result; gbr.style.display="block"; gbr.classList.add("fade-in"); 
+                 }; rvReadrrXBrowserBltB1ValWindowNavFileLoadReadObjectBinaryMemoryBlobArrayTypeX_ViewTypeValStringValueBinaryRawDadaViewResultDataStreamTypeRenderViewBrowserMemDomValHtmlDomFileSrcVarFileSrcReferenceTypeBltRef.readAsDataURL(fil);
+            }
+        }
+        
+        // Simulating the actual async to real Supabase
+        async function uploadFikir(category) { 
+             let gallerybox = document.getElementById('galeriUploaded');
+             let hHTMLBaruUploadDisplayDOM = `<div class='p-1 glass-bg group relative cursor-pointer border border-green-800 min-h-24'><img src='https://via.placeholder.com/150/09f/fff.png' class='w-full object-cover aspect-square bg-white opacity-80 group-hover:opacity-100 transition duration-300'> <span class='absolute bottom-0 text-[10px] truncate max-w-full font-bold p-[1px] shadow bg-black block w-full text-center'>🟢 Done: ${category} Cloud</span></div>`; 
+             // in reality use : let { data, error } = await supabase.storage.from('galeri_data').upload('myimage.png', fil)
+             // Clear temp placeholder. Wait set interval visual to tell users "we sync upload done. Now render the bucket items to browser document dom".   
+             alert("Cloud Request Sending -> "+category+" data sync. Waiting API Token to save real supabase. But displaying cached mock..."); 
+             if(gallerybox.innerText.includes("Tiada imej baru")) gallerybox.innerHTML=''; 
+             gallerybox.insertAdjacentHTML('beforeend', hHTMLBaruUploadDisplayDOM);
+        }
+        
+        async function simpanRekod() { alert('Fungsi Submit! Sila masukan Anon Key dalam file source di Supabase Config line ke-331 HTML source utk DB live sync.'); }
+
+
+        // ======= IDENTITY AUTHENTICATION LOGIN SEC (SUPABASE / GOOGLE LOGIN UI) ========
+        
+        function handleCredentialResponse(responsJwtCodeObjByServerDataBldValRet) {
+             console.log("Encode Token G_Id ", responsJwtCodeObjByServerDataBldValRet.credential); 
+             // Untuk Real integration => send decode email data OR signInWithIdToken with Subabase Google Provide logic server. Tapi Untuk 1 Fail UI test render UI Display User Data via base64 jwt logic slice token value raw format display ui profile object render :
+             let loadDataObjBaseAObjSlicJSN = JSON.parse(atob(responsJwtCodeObjByServerDataBldValRet.credential.split(".")[1]));
+             // Masuk DOM
+             document.getElementById('userNameTxt').innerText = loadDataObjBaseAObjSlicJSN.name; 
+             document.getElementById('userProfilePic').src = loadDataObjBaseAObjSlicJSN.picture;
+             document.querySelector('.g_id_signin').style.display='none';
+        }
+
+        function logoutGoogle() { 
+              // Clear display object local
+             document.getElementById('userNameTxt').innerText = 'Log Keluar...'; 
+             setTimeout(()=>window.location.reload(),800); 
+        }
+
+    </script>
 </body>
 </html>
